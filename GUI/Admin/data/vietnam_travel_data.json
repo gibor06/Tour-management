@@ -1,0 +1,698 @@
+{
+  "hdv": [
+    {
+      "maHDV": "HDV01",
+      "tenHDV": "Nguyễn Văn Anh",
+      "sdt": "0900000001",
+      "email": "hdv01@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV02",
+      "tenHDV": "Trần Minh Khoa",
+      "sdt": "0900000002",
+      "email": "hdv02@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV03",
+      "tenHDV": "Lê Hoàng Nam",
+      "sdt": "0900000003",
+      "email": "hdv03@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV04",
+      "tenHDV": "Phạm Hải Yến",
+      "sdt": "0900000004",
+      "email": "hdv04@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV05",
+      "tenHDV": "Đỗ Thanh Tùng",
+      "sdt": "0900000005",
+      "email": "hdv05@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV06",
+      "tenHDV": "Nguyễn Lan Anh",
+      "sdt": "0900000006",
+      "email": "hdv06@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV07",
+      "tenHDV": "Hoàng Minh Đức",
+      "sdt": "0900000007",
+      "email": "hdv07@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV08",
+      "tenHDV": "Bùi Thị Mai",
+      "sdt": "0900000008",
+      "email": "hdv08@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV09",
+      "tenHDV": "Trần Quốc Bảo",
+      "sdt": "0900000009",
+      "email": "hdv09@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV10",
+      "tenHDV": "Nguyễn Thanh Hương",
+      "sdt": "0900000010",
+      "email": "hdv10@travel.com",
+      "kn": "8",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV11",
+      "tenHDV": "Phan Minh Tuấn",
+      "sdt": "0900000011",
+      "email": "hdv11@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV12",
+      "tenHDV": "Lê Thị Trang",
+      "sdt": "0900000012",
+      "email": "hdv12@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV13",
+      "tenHDV": "Đặng Văn Long",
+      "sdt": "0900000013",
+      "email": "hdv13@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV14",
+      "tenHDV": "Trịnh Thu Hà",
+      "sdt": "0900000014",
+      "email": "hdv14@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV15",
+      "tenHDV": "Ngô Quang Huy",
+      "sdt": "0900000015",
+      "email": "hdv15@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV16",
+      "tenHDV": "Vũ Thị Lan",
+      "sdt": "0900000016",
+      "email": "hdv16@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV17",
+      "tenHDV": "Nguyễn Hoàng Phúc",
+      "sdt": "0900000017",
+      "email": "hdv17@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV18",
+      "tenHDV": "Phạm Thảo Vy",
+      "sdt": "0900000018",
+      "email": "hdv18@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV19",
+      "tenHDV": "Đỗ Minh Khôi",
+      "sdt": "0900000019",
+      "email": "hdv19@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV20",
+      "tenHDV": "Trần Mỹ Linh",
+      "sdt": "0900000020",
+      "email": "hdv20@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV21",
+      "tenHDV": "Lý Văn Sơn",
+      "sdt": "0900000021",
+      "email": "hdv21@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV22",
+      "tenHDV": "Nguyễn Thuỳ Dương",
+      "sdt": "0900000022",
+      "email": "hdv22@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV23",
+      "tenHDV": "Trần Đức Anh",
+      "sdt": "0900000023",
+      "email": "hdv23@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV24",
+      "tenHDV": "Phan Ngọc Mai",
+      "sdt": "0900000024",
+      "email": "hdv24@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV25",
+      "tenHDV": "Đinh Quang Hải",
+      "sdt": "0900000025",
+      "email": "hdv25@travel.com",
+      "kn": "8",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV26",
+      "tenHDV": "Nguyễn Kim Oanh",
+      "sdt": "0900000026",
+      "email": "hdv26@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV27",
+      "tenHDV": "Trương Minh Thành",
+      "sdt": "0900000027",
+      "email": "hdv27@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV28",
+      "tenHDV": "Phạm Thị Hạnh",
+      "sdt": "0900000028",
+      "email": "hdv28@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV29",
+      "tenHDV": "Đặng Quốc Dũng",
+      "sdt": "0900000029",
+      "email": "hdv29@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV30",
+      "tenHDV": "Lê Thu Giang",
+      "sdt": "0900000030",
+      "email": "hdv30@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV31",
+      "tenHDV": "Nguyễn Trung Kiên",
+      "sdt": "0900000031",
+      "email": "hdv31@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV32",
+      "tenHDV": "Phạm Ngọc Ánh",
+      "sdt": "0900000032",
+      "email": "hdv32@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV33",
+      "tenHDV": "Trần Văn Phát",
+      "sdt": "0900000033",
+      "email": "hdv33@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV34",
+      "tenHDV": "Nguyễn Thị Hồng",
+      "sdt": "0900000034",
+      "email": "hdv34@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV35",
+      "tenHDV": "Phan Quốc Tuấn",
+      "sdt": "0900000035",
+      "email": "hdv35@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV36",
+      "tenHDV": "Lê Thị Phương",
+      "sdt": "0900000036",
+      "email": "hdv36@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV37",
+      "tenHDV": "Ngô Văn Khánh",
+      "sdt": "0900000037",
+      "email": "hdv37@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV38",
+      "tenHDV": "Đặng Thị Vân",
+      "sdt": "0900000038",
+      "email": "hdv38@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV39",
+      "tenHDV": "Trần Văn Bình",
+      "sdt": "0900000039",
+      "email": "hdv39@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV40",
+      "tenHDV": "Phạm Thanh Tâm",
+      "sdt": "0900000040",
+      "email": "hdv40@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV41",
+      "tenHDV": "Nguyễn Văn Lộc",
+      "sdt": "0900000041",
+      "email": "hdv41@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV42",
+      "tenHDV": "Trần Thị Hương",
+      "sdt": "0900000042",
+      "email": "hdv42@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV43",
+      "tenHDV": "Phạm Quốc Hưng",
+      "sdt": "0900000043",
+      "email": "hdv43@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV44",
+      "tenHDV": "Lê Thị Nhung",
+      "sdt": "0900000044",
+      "email": "hdv44@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV45",
+      "tenHDV": "Ngô Văn Tuấn",
+      "sdt": "0900000045",
+      "email": "hdv45@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV46",
+      "tenHDV": "Nguyễn Thị Hà",
+      "sdt": "0900000046",
+      "email": "hdv46@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV47",
+      "tenHDV": "Trần Minh Phú",
+      "sdt": "0900000047",
+      "email": "hdv47@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV48",
+      "tenHDV": "Phạm Thị Lan",
+      "sdt": "0900000048",
+      "email": "hdv48@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV49",
+      "tenHDV": "Đỗ Văn Hùng",
+      "sdt": "0900000049",
+      "email": "hdv49@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Sẵn sàng"
+    },
+    {
+      "maHDV": "HDV50",
+      "tenHDV": "Nguyễn Thị Trang",
+      "sdt": "0900000050",
+      "email": "hdv50@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Sẵn sàng"
+    }
+  ],
+  "tours": [
+    {
+      "ma": "T01",
+      "ten": "Đà Lạt Phố Hoa",
+      "ngay": "15/03/2026",
+      "khach": "20",
+      "gia": "2250000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Đà Lạt",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV01"
+    },
+    {
+      "ma": "T02",
+      "ten": "Núi Bà Đen Tây Ninh",
+      "ngay": "16/03/2026",
+      "khach": "25",
+      "gia": "990000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Tây Ninh",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV02"
+    },
+    {
+      "ma": "T03",
+      "ten": "Phú Quốc Thiên Đường Biển",
+      "ngay": "17/03/2026",
+      "khach": "30",
+      "gia": "4500000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Phú Quốc",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV03"
+    },
+    {
+      "ma": "T04",
+      "ten": "Sapa Mây Núi",
+      "ngay": "18/03/2026",
+      "khach": "20",
+      "gia": "3500000",
+      "diemDi": "Hà Nội",
+      "diemDen": "Sapa",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV04"
+    },
+    {
+      "ma": "T05",
+      "ten": "Nha Trang Biển Xanh",
+      "ngay": "19/03/2026",
+      "khach": "25",
+      "gia": "2700000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Nha Trang",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV05"
+    },
+    {
+      "ma": "T06",
+      "ten": "Hạ Long Kỳ Quan",
+      "ngay": "20/03/2026",
+      "khach": "30",
+      "gia": "3200000",
+      "diemDi": "Hà Nội",
+      "diemDen": "Hạ Long",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV06"
+    },
+    {
+      "ma": "T07",
+      "ten": "Huế Cố Đô",
+      "ngay": "21/03/2026",
+      "khach": "20",
+      "gia": "2100000",
+      "diemDi": "Đà Nẵng",
+      "diemDen": "Huế",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV07"
+    },
+    {
+      "ma": "T08",
+      "ten": "Đà Nẵng – Bà Nà",
+      "ngay": "22/03/2026",
+      "khach": "25",
+      "gia": "2400000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Đà Nẵng",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV08"
+    },
+    {
+      "ma": "T09",
+      "ten": "Côn Đảo Tâm Linh",
+      "ngay": "23/03/2026",
+      "khach": "20",
+      "gia": "4200000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Côn Đảo",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV09"
+    },
+    {
+      "ma": "T10",
+      "ten": "Phan Thiết – Mũi Né",
+      "ngay": "24/03/2026",
+      "khach": "25",
+      "gia": "1600000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Phan Thiết",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV10"
+    }
+  ],
+  "bookings": [
+    {
+      "maBooking": "BK01",
+      "maTour": "T01",
+      "tenKhach": "Trần Thế Hệ",
+      "sdt": "0988000001",
+      "soNguoi": "2",
+      "trangThai": "Đã cọc"
+    },
+    {
+      "maBooking": "BK02",
+      "maTour": "T01",
+      "tenKhach": "Phạm Hải Yến",
+      "sdt": "0988000002",
+      "soNguoi": "3",
+      "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK03",
+      "maTour": "T02",
+      "tenKhach": "Nguyễn Văn Bình",
+      "sdt": "0988000003",
+      "soNguoi": "4",
+      "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK04",
+      "maTour": "T03",
+      "tenKhach": "Trần Minh Đức",
+      "sdt": "0988000004",
+      "soNguoi": "2",
+      "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK05",
+      "maTour": "T04",
+      "tenKhach": "Lê Thu Trang",
+      "sdt": "0988000005",
+      "soNguoi": "5",
+      "trangThai": "Đã cọc"
+    },
+    {
+      "maBooking": "BK06",
+      "maTour": "T05",
+      "tenKhach": "Ngô Văn Hùng",
+      "sdt": "0988000006",
+      "soNguoi": "3",
+      "trangThai": "Đã cọc"
+    },
+    {
+      "maBooking": "BK07",
+      "maTour": "T06",
+      "tenKhach": "Phan Quốc Anh",
+      "sdt": "0988000007",
+      "soNguoi": "4",
+      "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK08",
+      "maTour": "T07",
+      "tenKhach": "Bùi Thị Mai",
+      "sdt": "0988000008",
+      "soNguoi": "2",
+      "trangThai": "Đã cọc"
+    },
+    {
+      "maBooking": "BK09",
+      "maTour": "T08",
+      "tenKhach": "Nguyễn Văn Tâm",
+      "sdt": "0988000009",
+      "soNguoi": "6",
+      "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK10",
+      "maTour": "T09",
+      "tenKhach": "Phạm Thanh Sơn",
+      "sdt": "0988000010",
+      "soNguoi": "3",
+      "trangThai": "Đã thanh toán"
+    }
+  ]
+}
