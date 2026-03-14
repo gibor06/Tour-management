@@ -527,7 +527,7 @@ def khoi_tao_hdv(root, user_data=None):
 
 def logout_system(root):
     if messagebox.askyesno("Xác nhận", "Bạn có muốn đăng xuất khỏi hệ thống?"):
-        from ChayUD import TravelSystem
+        from main import TravelSystem
         for widget in root.winfo_children():
             widget.destroy()
         TravelSystem(root)

@@ -674,7 +674,7 @@ def khoi_tao_khach(root, user_data=None):
 
 def logout_user(root):
     if messagebox.askyesno("Xác nhận", "Bạn có muốn đăng xuất?"):
-        from ChayUD import TravelSystem
+        from main import TravelSystem
         for widget in root.winfo_children():
             widget.destroy()
         TravelSystem(root)

@@ -430,7 +430,10 @@ def validate_hdv(app, form_data, old_ma=None):
 
 def refresh_hdv(app, keyword=""):
     """Làm mới danh sách hiển thị HDV trong Treeview, có hỗ trợ tìm kiếm."""
-    tree = app["tv_hdv"]
+    tree = app.get("tv_hdv")
+    if not tree:
+        return
+
     # Xóa dữ liệu cũ trong bảng
     for item in tree.get_children():
         tree.delete(item)
@@ -459,7 +462,7 @@ def open_hdv_form(app, data=None):
     """Mở cửa sổ nhập liệu/chỉnh sửa thông tin HDV."""
     top = tk.Toplevel(app["root"])
     top.title("Thông tin hướng dẫn viên")
-    top.geometry("560x560")
+    top.geometry("560x600")
     top.configure(bg=THEME["bg"])
     top.transient(app["root"])
     top.grab_set()
@@ -528,11 +531,24 @@ def open_hdv_form(app, data=None):
 
         # Cập nhật danh sách HDV
         if data:
+            # Giữ nguyên các chỉ số đánh giá khi cập nhật
+            for field in ["total_reviews", "avg_rating", "skill_score", "attitude_score", "problem_solving_score"]:
+                if field in data:
+                    new_data[field] = data[field]
+            
             for i, h in enumerate(app["ql"].list_hdv):
                 if h["maHDV"] == data["maHDV"]:
                     app["ql"].list_hdv[i] = new_data
                     break
         else:
+            # Khởi tạo các trường đánh giá cho HDV mới
+            new_data.update({
+                "total_reviews": 0,
+                "avg_rating": 0,
+                "skill_score": 0,
+                "attitude_score": 0,
+                "problem_solving_score": 0
+            })
             app["ql"].list_hdv.append(new_data)
 
         # Lưu vào JSON và cập nhật giao diện
@@ -635,7 +651,10 @@ def admin_hdv_tab(app):
 
 def refresh_users(app, keyword=""):
     """Làm mới danh sách khách hàng."""
-    tree = app["tv_users"]
+    tree = app.get("tv_users")
+    if not tree:
+        return
+        
     for item in tree.get_children():
         tree.delete(item)
 
@@ -803,7 +822,10 @@ def validate_tour(app, form_data, old_ma=None):
 
 def refresh_tours(app, keyword=""):
     """Làm mới danh sách hiển thị Tour trong Treeview."""
-    tree = app["tv_tour"]
+    tree = app.get("tv_tour")
+    if not tree:
+        return
+        
     for item in tree.get_children():
         tree.delete(item)
 
@@ -1152,7 +1174,10 @@ def validate_booking(app, form_data, old_ma=None):
 
 def refresh_bookings(app, keyword=""):
     """Làm mới danh sách hiển thị Booking trong Treeview."""
-    tree = app["tv_booking"]
+    tree = app.get("tv_booking")
+    if not tree:
+        return
+        
     for item in tree.get_children():
         tree.delete(item)
         
@@ -1441,7 +1466,7 @@ def logout(app):
     """Xác nhận và đăng xuất, quay lại màn hình đăng nhập."""
     if messagebox.askyesno("Đăng xuất", "Bạn có chắc chắn muốn thoát khỏi hệ thống quản trị?"):
         # Import cục bộ để tránh vòng lặp import
-        from ChayUD import TravelSystem
+        from main import TravelSystem
         for widget in app["root"].winfo_children():
             widget.destroy()
         TravelSystem(app["root"])
