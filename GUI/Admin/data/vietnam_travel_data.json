@@ -30,7 +30,12 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Đang dẫn tour"
+      "trangThai": "Đang dẫn tour",
+      "total_reviews": 1,
+      "skill_score": 100.0,
+      "attitude_score": 100.0,
+      "problem_solving_score": 100.0,
+      "avg_rating": 100.0
     },
     {
       "maHDV": "HDV04",
@@ -695,6 +700,14 @@
       "sdt": "0988000010",
       "soNguoi": "3",
       "trangThai": "Đã thanh toán"
+    },
+    {
+      "maBooking": "BK11",
+      "maTour": "T03",
+      "tenKhach": "Trần Gia Bảo",
+      "sdt": "0988111222",
+      "soNguoi": "20",
+      "trangThai": "Đã cọc"
     }
   ],
   "users": [

@@ -345,7 +345,7 @@ def khoi_tao_hdv(root, user_data=None):
             tk.Label(app["detail_frame"], text="Hiện tại bạn chưa có tour nào được phân công.", 
                      font=("Times New Roman", 13), bg=THEME["bg"], fg=THEME["muted"]).pack(pady=20)
 
-    # --- TAB: THỐNG KÊ & PHẢN HỒI (GIỮ NGUYÊN LOGIC CŨ NHƯNG ĐỔI STYLE) ---
+    # --- TAB: THỐNG KÊ & PHẢN HỒI ---
     def tab_thong_ke():
         clear_container()
         tk.Label(content_area, text="HIỆU SUẤT & ĐÁNH GIÁ CỦA KHÁCH HÀNG", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
@@ -355,14 +355,18 @@ def khoi_tao_hdv(root, user_data=None):
     
         # Lấy mã HDV an toàn
         ma_hdv = user_data.get("maHDV", "") if user_data else ""
+        h = app["ql"].find_hdv(ma_hdv)
         
+        # Nếu không có dữ liệu thật, dùng mặc định
+        if not h: h = {"avg_rating": 0, "skill_score": 0, "attitude_score": 0, "problem_solving_score": 0, "total_reviews": 0}
+
         # Đếm số tour đã dẫn hoàn tất
         completed_tours = [t for t in app["ql"].list_tours if t.get("hdvPhuTrach") == ma_hdv and t.get("trangThai") == "Hoàn tất"]
         
         stats = [
-            ("Điểm trung bình", "4.9 / 5.0", THEME["warning"]), 
-            ("Tỷ lệ hài lòng", "98%", THEME["success"]), 
-            ("Số tour đã dẫn", str(len(completed_tours)), THEME["primary"])
+            ("Điểm trung bình", f"{h.get('avg_rating', 0) / 20:.1f} / 5.0", THEME["warning"]), 
+            ("Tỷ lệ hài lòng", f"{h.get('avg_rating', 0):.1f}%", THEME["success"]), 
+            ("Số lượt đánh giá", str(h.get("total_reviews", 0)), THEME["primary"])
         ]
     
         for t, v, c in stats:
@@ -377,9 +381,11 @@ def khoi_tao_hdv(root, user_data=None):
         chart_frame = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
         chart_frame.pack(fill="x")
 
-        criteria = [("Kiến thức chuyên môn", 95, THEME["primary"]), 
-                    ("Thái độ phục vụ", 98, THEME["success"]), 
-                    ("Xử lý tình huống", 85, THEME["warning"])]
+        criteria = [
+            ("Kiến thức chuyên môn", h.get("skill_score", 0), THEME["primary"]), 
+            ("Thái độ phục vụ", h.get("attitude_score", 0), THEME["success"]), 
+            ("Xử lý tình huống", h.get("problem_solving_score", 0), THEME["warning"])
+        ]
 
         for name, val, color in criteria:
             row = tk.Frame(chart_frame, bg=THEME["surface"])
@@ -389,8 +395,11 @@ def khoi_tao_hdv(root, user_data=None):
             p_bg = tk.Frame(row, bg="#e2e8f0", width=400, height=18)
             p_bg.pack(side="left", padx=15)
             p_bg.pack_propagate(False)
-            tk.Frame(p_bg, bg=color, width=int(val * 4), height=18).pack(side="left")
-            tk.Label(row, text=f"{val}%", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(side="left")
+            
+            # Đảm bảo thanh tiến trình không bị lỗi nếu val=0
+            fill_width = max(1, int(val * 4))
+            tk.Frame(p_bg, bg=color, width=fill_width, height=18).pack(side="left")
+            tk.Label(row, text=f"{val:.1f}%", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(side="left")
 
     def tab_thong_bao():
         clear_container()
@@ -399,20 +408,40 @@ def khoi_tao_hdv(root, user_data=None):
         card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
         card.pack(fill="both", expand=True)
         
-        tk.Label(card, text="Nội dung thông báo (Sẽ gửi đến tất cả khách hàng trong đoàn):", 
-                 font=("Times New Roman", 13), bg=THEME["surface"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
+        # 1. Chọn đoàn (Tour)
+        tk.Label(card, text="Gửi thông báo đến đoàn (Tour):", font=("Times New Roman", 13, "bold"), bg=THEME["surface"]).pack(anchor="w", pady=(0, 5))
+        
+        ma_hdv = user_data.get("maHDV", "")
+        my_tours = [t for t in app["ql"].list_tours if t.get("hdvPhuTrach") == ma_hdv]
+        tour_options = [f"{t['ma']} - {t['ten']}" for t in my_tours]
+        
+        tour_var = tk.StringVar()
+        tour_cb = ttk.Combobox(card, textvariable=tour_var, values=tour_options, state="readonly", font=("Times New Roman", 12), width=50)
+        tour_cb.pack(anchor="w", pady=(0, 20))
+        if tour_options:
+            tour_cb.current(0)
+
+        tk.Label(card, text="Nội dung thông báo:", 
+                 font=("Times New Roman", 13, "bold"), bg=THEME["surface"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
         
         txt = tk.Text(card, height=10, font=("Times New Roman", 13), relief="solid", bd=1)
         txt.pack(fill="both", expand=True, pady=(0, 20))
         
         def gui_thong_bao():
             content = txt.get("1.0", "end").strip()
+            if not tour_var.get():
+                return messagebox.showwarning("Lỗi", "Vui lòng chọn đoàn khách muốn gửi thông báo!")
             if not content:
                 return messagebox.showwarning("Lỗi", "Vui lòng nhập nội dung thông báo!")
+            
+            selected_tour_ma = tour_var.get().split(" - ")[0]
+            selected_tour_ten = tour_var.get().split(" - ")[1]
             
             new_notif = {
                 "maHDV": user_data.get("maHDV", "N/A"),
                 "tenHDV": user_data.get("tenHDV", "Hướng Dẫn Viên"),
+                "maTour": selected_tour_ma,
+                "tenTour": selected_tour_ten,
                 "content": content,
                 "date": datetime.now().strftime("%d/%m/%Y %H:%M")
             }
@@ -420,7 +449,7 @@ def khoi_tao_hdv(root, user_data=None):
             app["ql"].notifications.append(new_notif)
             app["ql"].save()
             
-            messagebox.showinfo("Thành công", "Đã gửi thông báo đến toàn bộ khách hàng và lưu vào hệ thống!")
+            messagebox.showinfo("Thành công", f"Đã gửi thông báo đến đoàn '{selected_tour_ten}'!")
             tab_danh_sach_tour()
 
         style_button(card, "XÁC NHẬN GỬI THÔNG BÁO", THEME["danger"], gui_thong_bao).pack()

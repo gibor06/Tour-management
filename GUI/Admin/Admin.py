@@ -43,7 +43,12 @@ DEFAULT_DATA = {
             "gioiTinh": "Nam",
             "khuVuc": "Miền Bắc",
             "trangThai": "Sẵn sàng",
-            "password": "123"
+            "password": "123",
+            "total_reviews": 0,
+            "avg_rating": 0,
+            "skill_score": 0,
+            "attitude_score": 0,
+            "problem_solving_score": 0
         },
         {
             "maHDV": "HDV02",
@@ -54,7 +59,12 @@ DEFAULT_DATA = {
             "gioiTinh": "Nam",
             "khuVuc": "Miền Trung",
             "trangThai": "Đang dẫn tour",
-            "password": "123"
+            "password": "123",
+            "total_reviews": 0,
+            "avg_rating": 0,
+            "skill_score": 0,
+            "attitude_score": 0,
+            "problem_solving_score": 0
         }
     ],
     "tours": [
@@ -122,6 +132,17 @@ class DataStore:
                     self.data = json.load(f)
                 for key in ["hdv", "tours", "bookings", "users"]:
                     if key not in self.data: self.data[key] = []
+                
+                # Tự kiểm tra và bổ sung các trường dữ liệu còn thiếu cho HDV
+                rating_fields = {
+                    "total_reviews": 0, "avg_rating": 0, "skill_score": 0, 
+                    "attitude_score": 0, "problem_solving_score": 0
+                }
+                for h in self.data["hdv"]:
+                    if "password" not in h: h["password"] = "123"
+                    for field, default_val in rating_fields.items():
+                        if field not in h: h[field] = default_val
+
                 if "admin" not in self.data: self.data["admin"] = DEFAULT_DATA["admin"]
             except:
                 self.data = copy.deepcopy(DEFAULT_DATA)
@@ -1341,14 +1362,14 @@ def admin_feedback_tab(app):
     rev_wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
     rev_wrapper.pack(fill="both", expand=True, pady=(0, 20))
     
-    rev_tv = ttk.Treeview(rev_wrapper, columns=("user", "name", "content", "date"), show="headings", height=8)
-    rev_tv.heading("user", text="Username")
-    rev_tv.heading("name", text="Họ tên")
+    rev_tv = ttk.Treeview(rev_wrapper, columns=("user", "target", "content", "date"), show="headings", height=8)
+    rev_tv.heading("user", text="Khách hàng")
+    rev_tv.heading("target", text="Đối tượng")
     rev_tv.heading("content", text="Nội dung đánh giá")
     rev_tv.heading("date", text="Ngày gửi")
     
-    rev_tv.column("user", width=100, anchor="center")
-    rev_tv.column("name", width=150, anchor="w")
+    rev_tv.column("user", width=150, anchor="w")
+    rev_tv.column("target", width=150, anchor="center")
     rev_tv.column("content", width=500, anchor="w")
     rev_tv.column("date", width=150, anchor="center")
     
@@ -1356,7 +1377,16 @@ def admin_feedback_tab(app):
     ttk.Scrollbar(rev_wrapper, orient="vertical", command=rev_tv.yview).pack(side="right", fill="y")
     
     for r in app["ql"].list_reviews:
-        rev_tv.insert("", "end", values=(r.get("username"), r.get("fullname"), r.get("content"), r.get("date")))
+        target_display = r.get("target", "Công ty")
+        if target_display == "HDV":
+            target_display = f"HDV: {r.get('target_id', '')}"
+            
+        rev_tv.insert("", "end", values=(
+            f"{r.get('fullname')} ({r.get('username')})", 
+            target_display, 
+            r.get("content"), 
+            r.get("date")
+        ))
     apply_zebra(rev_tv)
 
     # 2. PHẦN THÔNG BÁO TỪ HDV
@@ -1365,22 +1395,31 @@ def admin_feedback_tab(app):
     notif_wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
     notif_wrapper.pack(fill="both", expand=True)
     
-    notif_tv = ttk.Treeview(notif_wrapper, columns=("ma", "ten", "content", "date"), show="headings", height=8)
+    notif_tv = ttk.Treeview(notif_wrapper, columns=("ma", "ten", "tour", "content", "date"), show="headings", height=8)
     notif_tv.heading("ma", text="Mã HDV")
     notif_tv.heading("ten", text="Tên HDV")
+    notif_tv.heading("tour", text="Đoàn (Tour)")
     notif_tv.heading("content", text="Nội dung thông báo")
     notif_tv.heading("date", text="Ngày gửi")
     
     notif_tv.column("ma", width=100, anchor="center")
     notif_tv.column("ten", width=150, anchor="w")
-    notif_tv.column("content", width=500, anchor="w")
+    notif_tv.column("tour", width=200, anchor="w")
+    notif_tv.column("content", width=400, anchor="w")
     notif_tv.column("date", width=150, anchor="center")
     
     notif_tv.pack(side="left", fill="both", expand=True)
     ttk.Scrollbar(notif_wrapper, orient="vertical", command=notif_tv.yview).pack(side="right", fill="y")
     
     for n in app["ql"].list_notifications:
-        notif_tv.insert("", "end", values=(n.get("maHDV"), n.get("tenHDV"), n.get("content"), n.get("date")))
+        tour_info = f"{n.get('maTour', 'N/A')} - {n.get('tenTour', '')}"
+        notif_tv.insert("", "end", values=(
+            n.get("maHDV"), 
+            n.get("tenHDV"), 
+            tour_info,
+            n.get("content"), 
+            n.get("date")
+        ))
     apply_zebra(notif_tv)
     
     set_status(app, "Đang xem Đánh giá & Thông báo", THEME["primary"])
