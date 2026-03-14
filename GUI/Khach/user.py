@@ -367,9 +367,23 @@ def khoi_tao_khach(root, user_data=None):
             style_button(card, "Hủy", THEME["danger"], lambda m=b["maBooking"]: huy_tour(m)).pack(side="right")
 
     def huy_tour(ma_booking):
+        # Tìm booking cần hủy
+        booking = next((b for b in app["ql"].list_bookings if b["maBooking"] == ma_booking), None)
+        if not booking:
+            return
+
+        # Kiểm tra trạng thái tour
+        t = app["ql"].find_tour(booking["maTour"])
+        if t and t.get("trangThai") in ["Đã chốt", "Đang đi", "Hoàn thành"]:
+            messagebox.showwarning("Không thể hủy", 
+                                   f"Tour '{t['ten']}' hiện đang ở trạng thái '{t['trangThai']}'.\n"
+                                   "Bạn không thể tự hủy booking này. Vui lòng liên hệ quản trị viên để được hỗ trợ.")
+            return
+
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn hủy đặt chỗ {ma_booking}?"):
             app["ql"].data["bookings"] = [b for b in app["ql"].list_bookings if b["maBooking"] != ma_booking]
             app["ql"].save()
+            messagebox.showinfo("Thành công", f"Đã hủy đặt chỗ {ma_booking} thành công.")
             tab_tour_da_dat()
 
     # --- TAB: GỬI ĐÁNH GIÁ ---

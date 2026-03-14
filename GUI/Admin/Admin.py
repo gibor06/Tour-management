@@ -801,7 +801,7 @@ def open_tour_form(app, data=None):
         ("Giá tour (VNĐ)", "gia", "entry"),
         ("Điểm xuất phát", "diemDi", "entry"),
         ("Điểm đến", "diemDen", "entry"),
-        ("Trạng thái", "trangThai", "combo", ["Mở bán", "Đã chốt", "Hoàn tất", "Tạm hoãn"]),
+        ("Trạng thái", "trangThai", "combo", ["Mở bán", "Đã chốt", "Đang đi", "Hoàn tất", "Đã hủy", "Tạm hoãn"]),
         ("HDV phụ trách", "hdvPhuTrach", "combo", hdv_codes),
     ]
 
@@ -837,6 +837,16 @@ def open_tour_form(app, data=None):
             else:
                 form_data[key] = widgets[key].get().strip()
                 
+        # Kiểm tra nếu đổi trạng thái sang "Đã hủy" mà có khách đặt chỗ
+        if form_data["trangThai"] == "Đã hủy" and (not data or data["trangThai"] != "Đã hủy"):
+            booked = app["ql"].get_occupied_seats(form_data["ma"])
+            if booked > 0:
+                if not messagebox.askyesno("Xác nhận hủy", 
+                                           f"Tour '{form_data['ten']}' hiện đang có {booked} khách đặt chỗ.\n"
+                                           "Nếu hủy tour, bạn sẽ phải thực hiện quy trình hoàn tiền cho khách.\n"
+                                           "Bạn vẫn chắc chắn muốn đổi trạng thái sang 'Đã hủy'?"):
+                    return
+
         ok, msg = validate_tour(app, form_data, data["ma"] if data else None)
         if not ok:
             messagebox.showwarning("Thông báo", msg, parent=top)
@@ -887,7 +897,19 @@ def delete_tour(app):
         return
     ma = app["tv_tour"].item(sel[0])["values"][0]
     
-    # Ràng buộc: Không cho xóa nếu đã có người đặt chỗ
+    # Tìm thông tin tour
+    tour = app["ql"].find_tour(ma)
+    if not tour:
+        return
+
+    # Ràng buộc 1: Không cho xóa nếu tour đang hoạt động hoặc đã chốt
+    if tour.get("trangThai") in ["Đã chốt", "Đang đi"]:
+        messagebox.showwarning("Không thể xóa", 
+                               f"Tour '{tour['ten']}' hiện đang ở trạng thái '{tour['trangThai']}'.\n"
+                               "Bạn phải chuyển trạng thái tour về 'Mở bán' hoặc 'Hủy' trước khi xóa.")
+        return
+
+    # Ràng buộc 2: Không cho xóa nếu đã có người đặt chỗ
     if app["ql"].get_bookings_by_tour(ma):
         messagebox.showwarning("Không thể xóa", "Tour này đã có khách đặt chỗ (booking). Vui lòng xử lý các booking trước.")
         return
@@ -1206,6 +1228,17 @@ def delete_booking(app):
         messagebox.showwarning("Thông báo", "Vui lòng chọn booking cần xóa.")
         return
     ma = app["tv_booking"].item(sel[0])["values"][0]
+    
+    # Kiểm tra trạng thái tour trước khi cho phép xóa booking
+    booking = next((b for b in app["ql"].list_bookings if b["maBooking"] == ma), None)
+    if booking:
+        tour = app["ql"].find_tour(booking["maTour"])
+        if tour and tour.get("trangThai") in ["Đã chốt", "Đang đi"]:
+            if not messagebox.askyesno("Cảnh báo", 
+                                       f"Tour '{tour['ten']}' hiện đang ở trạng thái '{tour['trangThai']}'.\n"
+                                       "Việc xóa booking lúc này có thể ảnh hưởng đến việc điều hành tour.\n"
+                                       "Bạn vẫn chắc chắn muốn xóa?"):
+                return
     
     if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa booking {ma}?"):
         app["ql"].data["bookings"] = [b for b in app["ql"].list_bookings if b["maBooking"] != ma]
