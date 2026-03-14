@@ -41,6 +41,8 @@ THEME = {
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 DATA_DIR = os.path.join(BASE_DIR, "Admin", "data")
 DATA_FILE = os.path.join(DATA_DIR, "vietnam_travel_data.json")
+REVIEWS_FILE = os.path.join(DATA_DIR, "vietnam_travel_reviews.json")
+NOTIF_FILE = os.path.join(DATA_DIR, "vietnam_travel_notifications.json")
 
 # Dữ liệu mặc định nếu không tìm thấy tệp JSON
 DEFAULT_DATA = {
@@ -76,52 +78,68 @@ DEFAULT_DATA = {
 
 class DataStore:
     """Lớp quản lý việc nạp và lưu dữ liệu JSON."""
-    def __init__(self, path=DATA_FILE):
+    def __init__(self, path=DATA_FILE, rev_path=REVIEWS_FILE, notif_path=NOTIF_FILE):
         self.path = path
+        self.rev_path = rev_path
+        self.notif_path = notif_path
         self.data = {"hdv": [], "tours": [], "bookings": [], "users": [], "admin": {}}
+        self.reviews = []
+        self.notifications = []
         self.load()
 
     def load(self):
-        """Tải dữ liệu từ tệp JSON. Nếu tệp lỗi hoặc không tồn tại, sử dụng dữ liệu mặc định."""
+        """Tải dữ liệu từ các tệp JSON."""
+        # 1. Tải dữ liệu chính
         if not os.path.exists(self.path):
             self.data = copy.deepcopy(DEFAULT_DATA)
             self.save()
-            return
+        else:
+            try:
+                with open(self.path, "r", encoding="utf-8") as f:
+                    self.data = json.load(f)
+                for key in ["hdv", "tours", "bookings", "users"]:
+                    if key not in self.data: self.data[key] = []
+                if "admin" not in self.data: self.data["admin"] = DEFAULT_DATA["admin"]
+            except:
+                self.data = copy.deepcopy(DEFAULT_DATA)
 
-        try:
-            with open(self.path, "r", encoding="utf-8") as f:
-                self.data = json.load(f)
+        # 2. Tải đánh giá
+        if os.path.exists(self.rev_path):
+            try:
+                with open(self.rev_path, "r", encoding="utf-8") as f:
+                    self.reviews = json.load(f)
+            except: self.reviews = []
+        else: self.reviews = []
 
-            # Đảm bảo các khóa cần thiết luôn tồn tại
-            for key in ["hdv", "tours", "bookings", "users"]:
-                if key not in self.data or not isinstance(self.data[key], list):
-                    self.data[key] = []
-            
-            # Cập nhật mật khẩu mặc định cho các tài khoản HDV nếu thiếu
-            for default_h in DEFAULT_DATA["hdv"]:
-                h = self.find_hdv(default_h["maHDV"])
-                if h and "password" not in h:
-                    h["password"] = default_h["password"]
-            
-            # Đảm bảo có tài khoản khách hàng mặc định nếu danh sách trống
-            if not self.data["users"] and DEFAULT_DATA["users"]:
-                self.data["users"] = copy.deepcopy(DEFAULT_DATA["users"])
-
-            if "admin" not in self.data or not self.data["admin"]:
-                self.data["admin"] = DEFAULT_DATA["admin"]
-
-        except Exception:
-            self.data = copy.deepcopy(DEFAULT_DATA)
-            self.save()
+        # 3. Tải thông báo
+        if os.path.exists(self.notif_path):
+            try:
+                with open(self.notif_path, "r", encoding="utf-8") as f:
+                    self.notifications = json.load(f)
+            except: self.notifications = []
+        else: self.notifications = []
 
     def save(self):
-        """Lưu trạng thái dữ liệu hiện tại vào tệp JSON."""
+        """Lưu trạng thái dữ liệu hiện tại vào các tệp JSON tương ứng."""
         folder = os.path.dirname(self.path)
         if folder and not os.path.exists(folder):
             os.makedirs(folder, exist_ok=True)
 
+        # Lưu dữ liệu chính
+        clean_data = copy.deepcopy(self.data)
+        if "reviews" in clean_data: del clean_data["reviews"]
+        if "notifications" in clean_data: del clean_data["notifications"]
+        
         with open(self.path, "w", encoding="utf-8") as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=2)
+            json.dump(clean_data, f, ensure_ascii=False, indent=2)
+
+        # Lưu đánh giá riêng
+        with open(self.rev_path, "w", encoding="utf-8") as f:
+            json.dump(self.reviews, f, ensure_ascii=False, indent=2)
+
+        # Lưu thông báo riêng
+        with open(self.notif_path, "w", encoding="utf-8") as f:
+            json.dump(self.notifications, f, ensure_ascii=False, indent=2)
 
     @property
     def list_hdv(self): return self.data["hdv"]
@@ -131,6 +149,10 @@ class DataStore:
     def list_bookings(self): return self.data["bookings"]
     @property
     def list_users(self): return self.data["users"]
+    @property
+    def list_reviews(self): return self.reviews
+    @property
+    def list_notifications(self): return self.notifications
 
     def find_user(self, username):
         return next((u for u in self.list_users if u["username"] == username), None)
@@ -413,8 +435,25 @@ def khoi_tao_khach(root, user_data=None):
         txt = tk.Text(card, height=10, font=("Times New Roman", 13), relief="solid", bd=1)
         txt.pack(fill="both", expand=True, pady=(0, 20))
         
-        style_button(card, "GỬI NHẬN XÉT", THEME["primary"], 
-                     lambda: (messagebox.showinfo("Cảm ơn", "Cảm ơn bạn đã gửi phản hồi cho chúng tôi!"), tab_danh_sach_tour())).pack()
+        def gui_review():
+            content = txt.get("1.0", "end").strip()
+            if not content:
+                return messagebox.showwarning("Lỗi", "Vui lòng nhập nội dung đánh giá!")
+            
+            new_review = {
+                "username": user_data.get("username", "N/A"),
+                "fullname": user_data.get("name", "Khách hàng"),
+                "content": content,
+                "date": datetime.now().strftime("%d/%m/%Y %H:%M")
+            }
+            
+            app["ql"].reviews.append(new_review)
+            app["ql"].save()
+            
+            messagebox.showinfo("Cảm ơn", "Cảm ơn bạn đã gửi phản hồi cho chúng tôi!")
+            tab_danh_sach_tour()
+
+        style_button(card, "GỬI NHẬN XÉT", THEME["primary"], gui_review).pack()
 
     # --- TAB: HỒ SƠ CÁ NHÂN ---
     def tab_ho_so():

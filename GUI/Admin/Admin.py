@@ -24,10 +24,12 @@ THEME = {
     "zebra_odd": "#ffffff",  # Màu dòng lẻ bảng
 }
 
-# Đường dẫn tệp dữ liệu JSON
+# Đường dẫn các tệp dữ liệu JSON
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "vietnam_travel_data.json")
+REVIEWS_FILE = os.path.join(DATA_DIR, "vietnam_travel_reviews.json")
+NOTIF_FILE = os.path.join(DATA_DIR, "vietnam_travel_notifications.json")
 
 # Dữ liệu mặc định nếu không tìm thấy tệp JSON
 DEFAULT_DATA = {
@@ -97,54 +99,70 @@ DEFAULT_DATA = {
 
 
 class DataStore:
-    """Lớp quản lý việc lưu trữ và truy xuất dữ liệu từ file JSON."""
+    """Lớp quản lý việc lưu trữ và truy xuất dữ liệu từ các file JSON."""
 
-    def __init__(self, path=DATA_FILE):
+    def __init__(self, path=DATA_FILE, rev_path=REVIEWS_FILE, notif_path=NOTIF_FILE):
         self.path = path
+        self.rev_path = rev_path
+        self.notif_path = notif_path
         self.data = {"hdv": [], "tours": [], "bookings": [], "users": [], "admin": {}}
+        self.reviews = []
+        self.notifications = []
         self.load()
 
     def load(self):
-        """Tải dữ liệu từ tệp JSON. Nếu tệp lỗi hoặc không tồn tại, sử dụng dữ liệu mặc định."""
+        """Tải dữ liệu từ các tệp JSON."""
+        # 1. Tải dữ liệu chính
         if not os.path.exists(self.path):
             self.data = copy.deepcopy(DEFAULT_DATA)
             self.save()
-            return
+        else:
+            try:
+                with open(self.path, "r", encoding="utf-8") as f:
+                    self.data = json.load(f)
+                for key in ["hdv", "tours", "bookings", "users"]:
+                    if key not in self.data: self.data[key] = []
+                if "admin" not in self.data: self.data["admin"] = DEFAULT_DATA["admin"]
+            except:
+                self.data = copy.deepcopy(DEFAULT_DATA)
 
-        try:
-            with open(self.path, "r", encoding="utf-8") as f:
-                self.data = json.load(f)
+        # 2. Tải đánh giá
+        if os.path.exists(self.rev_path):
+            try:
+                with open(self.rev_path, "r", encoding="utf-8") as f:
+                    self.reviews = json.load(f)
+            except: self.reviews = []
+        else: self.reviews = []
 
-            # Đảm bảo các khóa cần thiết luôn tồn tại
-            for key in ["hdv", "tours", "bookings", "users"]:
-                if key not in self.data or not isinstance(self.data[key], list):
-                    self.data[key] = []
-            
-            # Cập nhật mật khẩu mặc định cho các tài khoản HDV nếu thiếu
-            for default_h in DEFAULT_DATA["hdv"]:
-                h = self.find_hdv(default_h["maHDV"])
-                if h and "password" not in h:
-                    h["password"] = default_h["password"]
-            
-            # Đảm bảo có tài khoản khách hàng mặc định nếu danh sách trống
-            if not self.data["users"] and DEFAULT_DATA["users"]:
-                self.data["users"] = copy.deepcopy(DEFAULT_DATA["users"])
-
-            if "admin" not in self.data or not self.data["admin"]:
-                self.data["admin"] = DEFAULT_DATA["admin"]
-
-        except Exception:
-            self.data = copy.deepcopy(DEFAULT_DATA)
-            self.save()
+        # 3. Tải thông báo
+        if os.path.exists(self.notif_path):
+            try:
+                with open(self.notif_path, "r", encoding="utf-8") as f:
+                    self.notifications = json.load(f)
+            except: self.notifications = []
+        else: self.notifications = []
 
     def save(self):
-        """Lưu trạng thái dữ liệu hiện tại vào tệp JSON."""
+        """Lưu trạng thái dữ liệu hiện tại vào các tệp JSON tương ứng."""
         folder = os.path.dirname(self.path)
         if folder and not os.path.exists(folder):
             os.makedirs(folder, exist_ok=True)
 
+        # Lưu dữ liệu chính (Bỏ reviews và notifications khỏi file này nếu có)
+        clean_data = copy.deepcopy(self.data)
+        if "reviews" in clean_data: del clean_data["reviews"]
+        if "notifications" in clean_data: del clean_data["notifications"]
+        
         with open(self.path, "w", encoding="utf-8") as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=2)
+            json.dump(clean_data, f, ensure_ascii=False, indent=2)
+
+        # Lưu đánh giá riêng
+        with open(self.rev_path, "w", encoding="utf-8") as f:
+            json.dump(self.reviews, f, ensure_ascii=False, indent=2)
+
+        # Lưu thông báo riêng
+        with open(self.notif_path, "w", encoding="utf-8") as f:
+            json.dump(self.notifications, f, ensure_ascii=False, indent=2)
 
     @property
     def list_hdv(self): return self.data["hdv"]
@@ -154,6 +172,10 @@ class DataStore:
     def list_bookings(self): return self.data["bookings"]
     @property
     def list_users(self): return self.data["users"]
+    @property
+    def list_reviews(self): return self.reviews
+    @property
+    def list_notifications(self): return self.notifications
 
     def find_user(self, username):
         """Tìm người dùng theo username."""
@@ -1309,6 +1331,61 @@ def admin_booking_tab(app):
     refresh_bookings(app, app["search_booking_var"].get())
 
 
+def admin_feedback_tab(app):
+    """Hiển thị tab quản lý Đánh giá & Thông báo."""
+    clear_container(app)
+    
+    # 1. PHẦN ĐÁNH GIÁ TỪ KHÁCH HÀNG
+    tk.Label(app["container"], text="ĐÁNH GIÁ TỪ KHÁCH HÀNG", font=("Times New Roman", 18, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
+    
+    rev_wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
+    rev_wrapper.pack(fill="both", expand=True, pady=(0, 20))
+    
+    rev_tv = ttk.Treeview(rev_wrapper, columns=("user", "name", "content", "date"), show="headings", height=8)
+    rev_tv.heading("user", text="Username")
+    rev_tv.heading("name", text="Họ tên")
+    rev_tv.heading("content", text="Nội dung đánh giá")
+    rev_tv.heading("date", text="Ngày gửi")
+    
+    rev_tv.column("user", width=100, anchor="center")
+    rev_tv.column("name", width=150, anchor="w")
+    rev_tv.column("content", width=500, anchor="w")
+    rev_tv.column("date", width=150, anchor="center")
+    
+    rev_tv.pack(side="left", fill="both", expand=True)
+    ttk.Scrollbar(rev_wrapper, orient="vertical", command=rev_tv.yview).pack(side="right", fill="y")
+    
+    for r in app["ql"].list_reviews:
+        rev_tv.insert("", "end", values=(r.get("username"), r.get("fullname"), r.get("content"), r.get("date")))
+    apply_zebra(rev_tv)
+
+    # 2. PHẦN THÔNG BÁO TỪ HDV
+    tk.Label(app["container"], text="THÔNG BÁO TỪ HƯỚNG DẪN VIÊN", font=("Times New Roman", 18, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
+    
+    notif_wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
+    notif_wrapper.pack(fill="both", expand=True)
+    
+    notif_tv = ttk.Treeview(notif_wrapper, columns=("ma", "ten", "content", "date"), show="headings", height=8)
+    notif_tv.heading("ma", text="Mã HDV")
+    notif_tv.heading("ten", text="Tên HDV")
+    notif_tv.heading("content", text="Nội dung thông báo")
+    notif_tv.heading("date", text="Ngày gửi")
+    
+    notif_tv.column("ma", width=100, anchor="center")
+    notif_tv.column("ten", width=150, anchor="w")
+    notif_tv.column("content", width=500, anchor="w")
+    notif_tv.column("date", width=150, anchor="center")
+    
+    notif_tv.pack(side="left", fill="both", expand=True)
+    ttk.Scrollbar(notif_wrapper, orient="vertical", command=notif_tv.yview).pack(side="right", fill="y")
+    
+    for n in app["ql"].list_notifications:
+        notif_tv.insert("", "end", values=(n.get("maHDV"), n.get("tenHDV"), n.get("content"), n.get("date")))
+    apply_zebra(notif_tv)
+    
+    set_status(app, "Đang xem Đánh giá & Thông báo", THEME["primary"])
+
+
 # CÁC HÀM HỆ THỐNG (SYSTEM FUNCTIONS)
 def manual_save(app):
     """Lưu dữ liệu vào file JSON một cách thủ công và hiển thị thông báo."""
@@ -1414,6 +1491,7 @@ def main(root=None):
     menu_btn("Quản lý Khách hàng", lambda: admin_user_tab(app)).pack(fill="x", pady=4)
     menu_btn("Quản lý Tour", lambda: admin_tour_tab(app)).pack(fill="x", pady=4)
     menu_btn("Quản lý Booking", lambda: admin_booking_tab(app)).pack(fill="x", pady=4)
+    menu_btn("Đánh giá & Thông báo", lambda: admin_feedback_tab(app)).pack(fill="x", pady=4)
     menu_btn("Lưu dữ liệu JSON", lambda: manual_save(app)).pack(fill="x", pady=4)
     
     # Đường kẻ ngăn cách
