@@ -94,11 +94,22 @@ class TravelSystem:
             hien_thi_admin(self.root)
             
         elif self.current_role == "guide":
-            user_data = {"name": username, "id": "HDV_GEN"} # Có thể lấy từ DB thật
+            # Lấy thông tin HDV từ DataStore để đồng bộ tên
+            from GUI.Admin.Admin import DataStore
+            ds = DataStore()
+            hdv_info = ds.find_hdv(username)
+            
+            user_data = {
+                "maHDV": username, 
+                "tenHDV": hdv_info["tenHDV"] if hdv_info else "Hướng Dẫn Viên"
+            }
             hien_thi_guide(self.root, user_data)
             
         elif self.current_role == "user":
-            user_data = {"name": username, "id": "KH_GEN"}
+            user_data = {
+                "name": username, 
+                "id": f"KH_{username}"
+            }
             hien_thi_khach(self.root, user_data)
 
     def show_register_screen(self):

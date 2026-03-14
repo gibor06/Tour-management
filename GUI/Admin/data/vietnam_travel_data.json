@@ -510,7 +510,7 @@
       "gia": "2250000",
       "diemDi": "TP.HCM",
       "diemDen": "Đà Lạt",
-      "trangThai": "Mở bán",
+      "trangThai": "Hoàn tất",
       "hdvPhuTrach": "HDV01"
     },
     {
@@ -619,8 +619,8 @@
       "maTour": "T01",
       "tenKhach": "Trần Thế Hệ",
       "sdt": "0988000001",
-      "soNguoi": "2",
-      "trangThai": "Đã cọc"
+      "soNguoi": "17",
+      "trangThai": "Đã thanh toán"
     },
     {
       "maBooking": "BK02",

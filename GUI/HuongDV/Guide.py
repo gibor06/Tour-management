@@ -1,163 +1,350 @@
-﻿import tkinter as tk
+﻿import json
+import os
+import re
+import tkinter as tk
 from tkinter import messagebox, ttk
+from datetime import datetime
+import copy
+
+
+# CẤU HÌNH GIAO DIỆN (THEME)
+THEME = {
+    "bg": "#f8fafc",        # Màu nền chính
+    "surface": "#ffffff",   # Màu nền các thẻ/panel
+    "sidebar": "#0f172a",   # Màu nền thanh menu bên trái
+    "primary": "#2563eb",   # Màu chính
+    "success": "#059669",   # Màu thành công/lưu
+    "danger": "#dc2626",    # Màu cảnh báo/xóa
+    "warning": "#d97706",   # Màu cảnh báo/chú ý
+    "text": "#0f172a",      # Màu chữ chính
+    "muted": "#64748b",     # Màu chữ phụ 
+    "border": "#cbd5e1",    # Màu đường viền
+    "note_bg": "#fff7ed",   # Màu nền ghi chú 
+    "note_fg": "#9a3412",   # Màu chữ ghi chú
+    "zebra_even": "#f8fafc", # Màu dòng chẵn bảng 
+    "zebra_odd": "#ffffff",  # Màu dòng lẻ bảng
+}
+
+# Đường dẫn tệp dữ liệu JSON (Dùng chung với Admin)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Lùi 1 cấp để ra QL_DL
+DATA_DIR = os.path.join(BASE_DIR, "Admin", "data")
+DATA_FILE = os.path.join(DATA_DIR, "vietnam_travel_data.json")
+
+# Dữ liệu mặc định nếu không tìm thấy tệp JSON
+DEFAULT_DATA = {
+    "hdv": [
+        {
+            "maHDV": "HDV01",
+            "tenHDV": "Nguyễn Văn Anh",
+            "sdt": "0901234567",
+            "email": "anh@travel.com",
+            "kn": "5",
+            "gioiTinh": "Nam",
+            "khuVuc": "Miền Bắc",
+            "trangThai": "Sẵn sàng"
+        },
+        {
+            "maHDV": "HDV02",
+            "tenHDV": "Trần Minh Khoa",
+            "sdt": "0912345678",
+            "email": "khoa@travel.com",
+            "kn": "3",
+            "gioiTinh": "Nam",
+            "khuVuc": "Miền Trung",
+            "trangThai": "Đang dẫn tour"
+        }
+    ],
+    "tours": [],
+    "bookings": []
+}
+
+class DataStore:
+    """Lớp quản lý việc lưu trữ và truy xuất dữ liệu từ file JSON."""
+    def __init__(self, path=DATA_FILE):
+        self.path = path
+        self.data = {"hdv": [], "tours": [], "bookings": []}
+        self.load()
+
+    def load(self):
+        """Tải dữ liệu từ tệp JSON. Nếu tệp lỗi hoặc không tồn tại, sử dụng dữ liệu mặc định."""
+        if not os.path.exists(self.path):
+            self.data = copy.deepcopy(DEFAULT_DATA)
+            self.save()
+            return
+
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                self.data = json.load(f)
+
+            # Đảm bảo các khóa cần thiết luôn tồn tại dưới dạng danh sách
+            for key in ["hdv", "tours", "bookings"]:
+                if key not in self.data or not isinstance(self.data[key], list):
+                    self.data[key] = []
+
+        except Exception:
+            self.data = copy.deepcopy(DEFAULT_DATA)
+            self.save()
+
+    def save(self):
+        """Lưu trạng thái dữ liệu hiện tại vào tệp JSON."""
+        folder = os.path.dirname(self.path)
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump(self.data, f, ensure_ascii=False, indent=2)
+
+    @property
+    def list_hdv(self): return self.data["hdv"]
+    @property
+    def list_tours(self): return self.data["tours"]
+    @property
+    def list_bookings(self): return self.data["bookings"]
+
+    def find_hdv(self, ma_hdv):
+        return next((h for h in self.list_hdv if h["maHDV"] == ma_hdv), None)
+
+    def find_tour(self, ma_tour):
+        return next((t for t in self.list_tours if t["ma"] == ma_tour), None)
+
+    def get_bookings_by_tour(self, ma_tour):
+        return [b for b in self.list_bookings if b["maTour"] == ma_tour]
+
+    def get_occupied_seats(self, ma_tour):
+        total = 0
+        for b in self.get_bookings_by_tour(ma_tour):
+            try: total += int(b.get("soNguoi", 0))
+            except: pass
+        return total
+
+# CÁC HÀM TIỆN ÍCH
+def apply_zebra(tree):
+    tree.tag_configure("odd", background=THEME["zebra_odd"])
+    tree.tag_configure("even", background=THEME["zebra_even"])
+    for i, item in enumerate(tree.get_children()):
+        tree.item(item, tags=(("even" if i % 2 == 0 else "odd"),))
+
+def style_button(parent, text, bg, command, fg="white"):
+    return tk.Button(
+        parent, text=text, bg=bg, fg=fg, activebackground=bg, activeforeground=fg,
+        relief="flat", bd=0, cursor="hand2", font=("Times New Roman", 12, "bold"),
+        padx=14, pady=8, command=command
+    )
+
+def safe_int(value):
+    try: return int(value)
+    except: return 0
 
 def khoi_tao_hdv(root, user_data=None):
-    # --- CẤU HÌNH STYLE ---
-    style = ttk.Style()
-    style.theme_use("clam")
-    style.configure("Treeview.Heading", font=('Times New Roman', 14, 'bold'), foreground="#ffffff", background="#1e3a8a")
-    style.configure("Treeview", font=('Times New Roman', 13), rowheight=35)
+    """Hàm chính khởi tạo giao diện cho Hướng dẫn viên."""
+    
+    # Nếu không có user_data, giả định là HDV01 để test
+    if not user_data:
+        user_data = {"maHDV": "HDV01", "tenHDV": "Hướng Dẫn Viên"}
 
-    # --- DỮ LIỆU GIẢ LẬP (DATABASE) ---
-    db_tours = {
-        "T001": {
-            "name": "Khám phá Sài Gòn",
-            "diem_den": [("08:00", "Dinh Độc Lập", "Quận 1"), ("10:00", "Bưu Điện TP", "Quận 1")],
-            "khach_hang": [("Nguyễn Văn An", "0901xxx", "Đã thanh toán"), ("Lê Thị Bình", "0912xxx", "Chưa thanh toán")]
-        },
-        "T002": {
-            "name": "Ẩm thực đường phố",
-            "diem_den": [("09:00", "Chợ Bến Thành", "Quận 1"), ("11:00", "Bitexco", "Quận 1")],
-            "khach_hang": [("Trần Văn Cường", "0988xxx", "Đã thanh toán")]
-        }
+    app = {
+        "root": root,
+        "ql": DataStore(),
+        "user": user_data,
+        "container": None,
+        "tv_tours": None,
+        "detail_frame": None
     }
 
-    # --- GIAO DIỆN CHÍNH ---
-    sidebar = tk.Frame(root, bg='#0f172a', width=280)
-    sidebar.pack(side='left', fill='y')
+    # Cấu hình Style Treeview
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure("Treeview", font=("Times New Roman", 12), rowheight=32, background=THEME["surface"], fieldbackground=THEME["surface"], foreground=THEME["text"])
+    style.configure("Treeview.Heading", font=("Times New Roman", 12, "bold"), background="#e2e8f0", foreground=THEME["text"])
+    style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", THEME["text"])])
+
+    # --- SIDEBAR ---
+    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=260)
+    sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    tk.Label(sidebar, text="VIETNAM TRAVEL", font=('Times New Roman', 18, 'bold'), fg='#10b981', bg='#0f172a', pady=30).pack()
+    tk.Label(sidebar, text="VIETNAM\nTRAVEL", justify="center", bg=THEME["sidebar"], fg="#10b981", font=("Times New Roman", 19, "bold"), pady=24).pack(fill="x")
+    
+    # Sử dụng .get() để tránh lỗi KeyError nếu thiếu dữ liệu
+    ten_hdv = user_data.get("tenHDV", "Hướng Dẫn Viên") if user_data else "Hướng Dẫn Viên"
+    tk.Label(sidebar, text=f"XIN CHÀO,\n{ten_hdv}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 14, "bold"), pady=10).pack(fill="x")
 
-    content_area = tk.Frame(root, bg='#f1f5f9', padx=30, pady=20)
-    content_area.pack(side='right', fill='both', expand=True)
+    menu = tk.Frame(sidebar, bg=THEME["sidebar"])
+    menu.pack(fill="x", padx=10, pady=20)
 
-    # --- HÀM XỬ LÝ CLICK CHỌN TOUR (TỪ CODE CŨ) ---
+    def menu_btn(text, cmd):
+        btn = tk.Button(
+            menu, text=f"   {text}", bg=THEME["sidebar"], fg="white", activebackground="#1e293b", activeforeground="white",
+            relief="flat", bd=0, cursor="hand2", anchor="w", font=("Times New Roman", 14, "bold"),
+            padx=16, pady=14, command=cmd
+        )
+        btn.pack(fill="x", pady=4)
+        return btn
+
+    # --- NỘI DUNG CHÍNH (Right Panel) ---
+    right_panel = tk.Frame(root, bg=THEME["bg"])
+    right_panel.pack(side="left", fill="both", expand=True)
+    
+    content_area = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=20)
+    content_area.pack(fill="both", expand=True)
+    app["container"] = content_area
+
+    def clear_container():
+        for widget in content_area.winfo_children():
+            widget.destroy()
+
+    # --- TAB: DANH SÁCH TOUR ---
     def hien_thi_chi_tiet(event):
-        selected_item = tv_tours.selection()
-        if not selected_item: return
-        tour_id = tv_tours.item(selected_item)['values'][0]
+        sel = app["tv_tours"].selection()
+        if not sel: return
+        ma_tour = app["tv_tours"].item(sel[0])["values"][0]
+        tour = app["ql"].find_tour(ma_tour)
+        bookings = app["ql"].get_bookings_by_tour(ma_tour)
         
-        for w in detail_frame.winfo_children(): w.destroy()
+        for w in app["detail_frame"].winfo_children(): w.destroy()
         
-        if tour_id in db_tours:
-            data = db_tours[tour_id]
-            # Bảng Địa Điểm
-            tk.Label(detail_frame, text=f"CHI TIẾT ĐỊA ĐIỂM - {tour_id}", font=('Times New Roman', 14, 'bold'), fg='#1e3a8a', bg='#f1f5f9').pack(pady=5)
-            tv_loc = ttk.Treeview(detail_frame, columns=('t','n','a'), show='headings', height=3)
-            tv_loc.heading('t', text='Giờ'); tv_loc.heading('n', text='Địa điểm'); tv_loc.heading('a', text='Khu vực')
-            for c in ('t','n','a'): tv_loc.column(c, anchor='center')
-            for loc in data['diem_den']: tv_loc.insert('', 'end', values=loc)
-            tv_loc.pack(fill='x', pady=5)
-            # Bảng Khách Hàng
-            tk.Label(detail_frame, text="DANH SÁCH KHÁCH TRONG ĐOÀN", font=('Times New Roman', 14, 'bold'), fg='#b91c1c', bg='#f1f5f9').pack(pady=5)
-            tv_cus = ttk.Treeview(detail_frame, columns=('n','p','s'), show='headings', height=3)
-            tv_cus.heading('n', text='Tên khách'); tv_cus.heading('p', text='SĐT'); tv_cus.heading('s', text='Trạng thái')
-            for c in ('n','p','s'): tv_cus.column(c, anchor='center')
-            for cus in data['khach_hang']: tv_cus.insert('', 'end', values=cus)
-            tv_cus.pack(fill='x')
+        # Tiêu đề chi tiết - Sử dụng wraplength để tránh tràn chiều ngang
+        tk.Label(app["detail_frame"], text=f"CHI TIẾT ĐOÀN KHÁCH - {tour['ten']}", 
+                 font=("Times New Roman", 15, "bold"), bg=THEME["bg"], fg=THEME["primary"],
+                 wraplength=700, justify="center").pack(pady=(10, 5))
+        
+        # Bảng khách hàng - Giảm height xuống để tránh tràn chiều dọc
+        wrapper = tk.Frame(app["detail_frame"], bg=THEME["surface"], bd=1, relief="solid")
+        wrapper.pack(fill="both", expand=True)
+        
+        cols = ("stt", "ten", "sdt", "sl", "tt")
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=6) # Giảm từ 8 xuống 6
+        tv.heading("stt", text="STT"); tv.heading("ten", text="Tên khách hàng")
+        tv.heading("sdt", text="Số điện thoại"); tv.heading("sl", text="Số người"); tv.heading("tt", text="Trạng thái")
+        
+        # Tối ưu hóa chiều rộng các cột
+        tv.column("stt", width=40, anchor="center")
+        tv.column("ten", width=180, anchor="w")
+        tv.column("sdt", width=110, anchor="center")
+        tv.column("sl", width=70, anchor="center")
+        tv.column("tt", width=110, anchor="center")
+        
+        for i, b in enumerate(bookings, 1):
+            tv.insert("", "end", values=(i, b["tenKhach"], b["sdt"], b["soNguoi"], b["trangThai"]))
+        
+        apply_zebra(tv)
+        tv.pack(side="left", fill="both", expand=True)
+        
+        # Thanh cuộn
+        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+        tv.configure(yscrollcommand=sy.set)
+        sy.pack(side="right", fill="y")
 
-    # --- CÁC TAB CHỨC NĂNG ---
+    def tab_danh_sach_tour():
+        clear_container()
+        tk.Label(content_area, text="LỊCH TRÌNH TOUR ĐƯỢC PHÂN CÔNG", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 15))
+        
+        # Lấy mã HDV an toàn
+        ma_hdv = user_data.get("maHDV", "") if user_data else ""
+        
+        # Lọc tour của HDV này
+        my_tours = [t for t in app["ql"].list_tours if t.get("hdvPhuTrach") == ma_hdv]
+        
+        # Khung bao bảng danh sách tour - Giảm height xuống
+        wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
+        wrapper.pack(fill="x")
+        
+        cols = ("ma", "ten", "ngay", "khach", "tt")
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=5) # Giảm từ 6 xuống 5
+        app["tv_tours"] = tv
+        
+        tv.heading("ma", text="Mã Tour"); tv.heading("ten", text="Tên Tour")
+        tv.heading("ngay", text="Ngày khởi hành"); tv.heading("khach", text="Số khách"); tv.heading("tt", text="Trạng thái")
+        
+        for c in cols: tv.column(c, anchor="center")
+        tv.column("ten", width=220, anchor="w") # Giảm từ 250 xuống 220
+        
+        for t in my_tours:
+            occupied = app["ql"].get_occupied_seats(t["ma"])
+            tv.insert("", "end", values=(t["ma"], t["ten"], t["ngay"], f"{occupied}/{t['khach']}", t["trangThai"]))
+            
+        apply_zebra(tv)
+        tv.pack(fill="x")
+        tv.bind("<<TreeviewSelect>>", hien_thi_chi_tiet)
+        
+        # Vùng hiển thị chi tiết bên dưới
+        app["detail_frame"] = tk.Frame(content_area, bg=THEME["bg"])
+        app["detail_frame"].pack(fill="both", expand=True, pady=10)
+        
+        if not my_tours:
+            tk.Label(app["detail_frame"], text="Hiện tại bạn chưa có tour nào được phân công.", 
+                     font=("Times New Roman", 13), bg=THEME["bg"], fg=THEME["muted"]).pack(pady=20)
 
-    def mo_tab_danh_sach_tour():
-        for w in content_area.winfo_children(): w.destroy()
-        tk.Label(content_area, text="QUẢN LÝ TOUR ĐƯỢC GIAO", font=('Times New Roman', 18, 'bold'), fg='#1e3a8a', bg='#f1f5f9').pack(pady=(0, 10))
+    # --- TAB: THỐNG KÊ & PHẢN HỒI (GIỮ NGUYÊN LOGIC CŨ NHƯNG ĐỔI STYLE) ---
+    def tab_thong_ke():
+        clear_container()
+        tk.Label(content_area, text="HIỆU SUẤT & ĐÁNH GIÁ CỦA KHÁCH HÀNG", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
         
-        global tv_tours, detail_frame
-        tv_tours = ttk.Treeview(content_area, columns=('id','name','date'), show='headings', height=5)
-        tv_tours.heading('id', text='Mã Tour'); tv_tours.heading('name', text='Tên Tour'); tv_tours.heading('date', text='Khởi hành')
-        for c in ('id','name','date'): tv_tours.column(c, anchor='center')
+        card_frame = tk.Frame(content_area, bg=THEME["bg"])
+        card_frame.pack(fill="x", pady=10)
+    
+        # Lấy mã HDV an toàn
+        ma_hdv = user_data.get("maHDV", "") if user_data else ""
         
-        for tid, tinfo in db_tours.items():
-            tv_tours.insert('', 'end', values=(tid, tinfo['name'], "12/03/2026"))
+        # Đếm số tour đã dẫn hoàn tất
+        completed_tours = [t for t in app["ql"].list_tours if t.get("hdvPhuTrach") == ma_hdv and t.get("trangThai") == "Hoàn tất"]
         
-        tv_tours.pack(fill='x', pady=10)
-        tv_tours.bind("<<TreeviewSelect>>", hien_thi_chi_tiet)
-        detail_frame = tk.Frame(content_area, bg='#f1f5f9')
-        detail_frame.pack(fill='both', expand=True)
-
-    def mo_tab_thong_ke():
-        for w in content_area.winfo_children(): w.destroy()
-    
-        # --- TIÊU ĐỀ CHÍNH ---
-        tk.Label(content_area, text="TRUNG TÂM PHÂN TÍCH & ĐÁNH GIÁ HIỆU SUẤT", 
-                 font=('Times New Roman', 18, 'bold'), fg='#1e3a8a', bg='#f1f5f9').pack(pady=(0, 20))
-    
-        # --- 1. THẺ THÔNG SỐ NHANH (CARDS) ---
-        card_frame = tk.Frame(content_area, bg='#f1f5f9')
-        card_frame.pack(fill='x', pady=10)
-    
         stats = [
-            ("Điểm Đánh Giá", "4.9 / 5.0", "#f59e0b"), 
-            ("Tỷ Lệ Hoàn Thành", "95%", "#10b981"), 
-            ("Phản Hồi Tích Cực", "98.5%", "#ec4899")
+            ("Điểm trung bình", "4.9 / 5.0", THEME["warning"]), 
+            ("Tỷ lệ hài lòng", "98%", THEME["success"]), 
+            ("Số tour đã dẫn", str(len(completed_tours)), THEME["primary"])
         ]
     
         for t, v, c in stats:
-            f = tk.Frame(card_frame, bg='white', bd=1, relief='solid', padx=15, pady=15)
-            f.pack(side='left', expand=True, fill='both', padx=10)
-            tk.Label(f, text=t, font=('Times New Roman', 14, 'bold'), bg='white').pack()
-            tk.Label(f, text=v, font=('Times New Roman', 22, 'bold'), fg=c, bg='white').pack()
+            f = tk.Frame(card_frame, bg=THEME["surface"], bd=1, relief="solid", padx=15, pady=15)
+            f.pack(side="left", expand=True, fill="both", padx=8)
+            tk.Label(f, text=t, font=("Times New Roman", 13, "bold"), bg=THEME["surface"], fg=THEME["muted"]).pack()
+            tk.Label(f, text=v, font=("Times New Roman", 22, "bold"), fg=c, bg=THEME["surface"]).pack()
 
-        # --- 2. BIỂU ĐỒ GIẢ LẬP (SÁNG TẠO) ---
-        tk.Label(content_area, text="Mức độ hài lòng theo tiêu chí (%)", 
-                 font=('Times New Roman', 15, 'bold'), bg='#f1f5f9', fg='#1e293b').pack(pady=(20, 10))
-    
-        chart_frame = tk.Frame(content_area, bg='white', bd=1, relief='flat', padx=20, pady=20)
-        chart_frame.pack(fill='x', padx=10)
+        # Biểu đồ tiêu chí
+        tk.Label(content_area, text="Chỉ số đánh giá chuyên môn (%)", font=("Times New Roman", 15, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(pady=(25, 10), anchor="w")
+        
+        chart_frame = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
+        chart_frame.pack(fill="x")
 
-        criteria = [("Kiến thức chuyên môn", 95, "#3b82f6"), 
-                    ("Thái độ phục vụ", 98, "#10b981"), 
-                    ("Xử lý tình huống", 85, "#f59e0b")]
+        criteria = [("Kiến thức chuyên môn", 95, THEME["primary"]), 
+                    ("Thái độ phục vụ", 98, THEME["success"]), 
+                    ("Xử lý tình huống", 85, THEME["warning"])]
 
         for name, val, color in criteria:
-            row = tk.Frame(chart_frame, bg='white')
-            row.pack(fill='x', pady=5)
-            tk.Label(row, text=name, font=('Times New Roman', 13), width=20, anchor='w', bg='white').pack(side='left')
+            row = tk.Frame(chart_frame, bg=THEME["surface"])
+            row.pack(fill="x", pady=8)
+            tk.Label(row, text=name, font=("Times New Roman", 12), width=20, anchor="w", bg=THEME["surface"]).pack(side="left")
+            
+            p_bg = tk.Frame(row, bg="#e2e8f0", width=400, height=18)
+            p_bg.pack(side="left", padx=15)
+            p_bg.pack_propagate(False)
+            tk.Frame(p_bg, bg=color, width=int(val * 4), height=18).pack(side="left")
+            tk.Label(row, text=f"{val}%", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(side="left")
+
+    def tab_thong_bao():
+        clear_container()
+        tk.Label(content_area, text="GỬI THÔNG BÁO KHẨN CẤP", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["danger"]).pack(anchor="w", pady=(0, 10))
         
-            # Thanh tiến trình giả lập biểu đồ
-            progress_bg = tk.Frame(row, bg='#e2e8f0', width=400, height=20)
-            progress_bg.pack(side='left', padx=10)
-            progress_bg.pack_propagate(False)
+        card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
+        card.pack(fill="both", expand=True)
         
-            tk.Frame(progress_bg, bg=color, width=int(val * 4), height=20).pack(side='left') # Độ dài dựa trên %
-            tk.Label(row, text=f"{val}%", font=('Times New Roman', 13, 'bold'), bg='white').pack(side='left')
+        tk.Label(card, text="Nội dung thông báo (Sẽ gửi đến tất cả khách hàng trong đoàn):", 
+                 font=("Times New Roman", 13), bg=THEME["surface"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
+        
+        txt = tk.Text(card, height=10, font=("Times New Roman", 13), relief="solid", bd=1)
+        txt.pack(fill="both", expand=True, pady=(0, 20))
+        
+        style_button(card, "XÁC NHẬN GỬI THÔNG BÁO", THEME["danger"], 
+                     lambda: messagebox.showinfo("Thành công", "Đã gửi thông báo đến toàn bộ khách hàng!")).pack()
 
-        # --- 3. BẢNG ĐÁNH GIÁ CHI TIẾT TỪ KHÁCH ---
-        tk.Label(content_area, text="Chi tiết đánh giá gần nhất", 
-                 font=('Times New Roman', 15, 'bold'), bg='#f1f5f9', fg='#1e293b').pack(pady=(20, 10))
-
-        cols = ('id', 'guest', 'star', 'comment')
-        tv_feedback = ttk.Treeview(content_area, columns=cols, show='headings', height=4)
-        tv_feedback.heading('id', text='Mã Tour'); tv_feedback.heading('guest', text='Khách Hàng')
-        tv_feedback.heading('star', text='Số Sao'); tv_feedback.heading('comment', text='Nội Dung Phản Hồi')
+    # --- ĐĂNG KÝ NÚT MENU ---
+    menu_btn("Lịch Trình Tour", tab_danh_sach_tour)
+    menu_btn("Hiệu Suất & Đánh Giá", tab_thong_ke)
+    menu_btn("Gửi Thông Báo", tab_thong_bao)
     
-        for c in cols: tv_feedback.column(c, anchor='center')
-        tv_feedback.column('comment', width=400) # Cột nhận xét rộng hơn
-
-        # Dữ liệu đánh giá mẫu
-        feedbacks = [
-            ("T001", "Nguyễn An", "⭐⭐⭐⭐⭐", "HDV rất am hiểu lịch sử, nói chuyện lôi cuốn."),
-            ("T001", "Trần Bình", "⭐⭐⭐⭐", "Chuyến đi tuyệt vời, nhưng thời gian hơi gấp."),
-            ("T002", "Lê Cường", "⭐⭐⭐⭐⭐", "Món ăn ngon, HDV hỗ trợ nhiệt tình lúc mình bị lạc.")
-        ]
-        for fb in feedbacks: tv_feedback.insert('', 'end', values=fb)
-        tv_feedback.pack(fill='x', pady=5)
-
-    def mo_tab_thong_bao():
-        for w in content_area.winfo_children(): w.destroy()
-        tk.Label(content_area, text="GỬI THÔNG BÁO CHO ĐOÀN KHÁCH", font=('Times New Roman', 18, 'bold'), fg='#b91c1c', bg='#f1f5f9').pack(pady=(0, 10))
-        tk.Label(content_area, text="Nhập nội dung (SMS/App):", font=('Times New Roman', 13), bg='#f1f5f9').pack(anchor='w')
-        txt = tk.Text(content_area, height=8, font=('Times New Roman', 14)); txt.pack(fill='x', pady=10)
-        tk.Button(content_area, text="XÁC NHẬN GỬI", bg='#b91c1c', fg='white', font=('Times New Roman', 14, 'bold'), 
-                  padx=20, pady=10, command=lambda: messagebox.showinfo("Gửi", "Đã gửi thông báo thành công!")).pack()
-
-    # --- MENU SIDEBAR ---
-    btn_style = {"font": ('Times New Roman', 14, 'bold'), "bg": '#1e293b', "fg": 'white', "bd": 0, "pady": 15, "anchor": 'w', "padx": 20, "cursor": 'hand2'}
+    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=10)
     
-    tk.Button(sidebar, text="Danh Sách Tour", command=mo_tab_danh_sach_tour, **btn_style).pack(fill='x')
-    tk.Button(sidebar, text="Thống Kê Báo Cáo", command=mo_tab_thong_ke, **btn_style).pack(fill='x')
-    tk.Button(sidebar, text="Gửi Thông Báo", command=mo_tab_thong_bao, **btn_style).pack(fill='x')
-    tk.Button(sidebar, text="Đăng Xuất", command=root.quit, **btn_style).pack(fill='x', side='bottom')
+    style_button(sidebar, "Đăng Xuất", THEME["danger"], root.quit).pack(fill="x", side="bottom", padx=10, pady=20)
 
-    mo_tab_danh_sach_tour() # Mặc định mở danh sách tour
+    tab_danh_sach_tour() # Mở mặc định
