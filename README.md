@@ -10,33 +10,6 @@
 
 ---
 
-<p align="center">
-
-![Python](https://img.shields.io/badge/Python-3.x-blue?style=flat-square\&logo=python)
-![Tkinter](https://img.shields.io/badge/Tkinter-GUI-green?style=flat-square)
-![JSON](https://img.shields.io/badge/Data-JSON-orange?style=flat-square)
-![GitHub](https://img.shields.io/badge/Version-GitHub-black?style=flat-square\&logo=github)
-
-</p>
-
----
-
-# 📖 Mục lục
-
-* [1. Giới thiệu](#-1-giới-thiệu)
-* [2. Mục tiêu dự án](#-2-mục-tiêu-dự-án)
-* [3. Chức năng hệ thống](#-3-chức-năng-hệ-thống)
-* [4. Công nghệ sử dụng](#-4-công-nghệ-sử-dụng)
-* [5. Cấu trúc dự án](#-5-cấu-trúc-dự-án)
-* [6. Hướng dẫn cài đặt](#-6-hướng-dẫn-cài-đặt)
-* [7. Hướng dẫn sử dụng](#-7-hướng-dẫn-sử-dụng)
-* [8. Đóng gói ứng dụng](#-8-đóng-gói-ứng-dụng)
-* [9. Kết luận](#-9-kết-luận)
-* [Tác giả](#-tác-giả)
-* [Liên hệ](#-liên-hệ)
-
----
-
 # 📌 1. Giới thiệu
 
 Trong bối cảnh ngành du lịch ngày càng phát triển, việc quản lý thông tin tour, khách hàng và lịch trình trở nên quan trọng đối với các doanh nghiệp lữ hành. Các phương pháp quản lý thủ công thường gây ra nhiều hạn chế như khó theo dõi dữ liệu, dễ xảy ra sai sót và thiếu tính đồng bộ.
