@@ -7,6 +7,19 @@ from datetime import datetime
 import copy
 
 
+# CÁC HÀM KIỂM TRA DỮ LIỆU (VALIDATION)
+def is_valid_phone(phone):
+    """Kiểm tra số điện thoại (10 chữ số, bắt đầu bằng số 0)."""
+    return bool(re.fullmatch(r"0\d{9}", phone))
+
+def is_valid_email(email):
+    """Kiểm tra định dạng email."""
+    return bool(re.fullmatch(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", email))
+
+def is_valid_password(pwd):
+    """Kiểm tra mật khẩu (tối thiểu 3 ký tự)."""
+    return len(pwd) >= 3
+
 # CẤU HÌNH GIAO DIỆN (THEME)
 THEME = {
     "bg": "#f8fafc",        # Màu nền chính
@@ -402,8 +415,26 @@ def khoi_tao_hdv(root, user_data=None):
             widgets[key] = e
 
         def save_profile():
-            for key, entry in widgets.items():
-                hdv_data[key] = entry.get().strip()
+            new_name = widgets["tenHDV"].get().strip()
+            new_phone = widgets["sdt"].get().strip()
+            new_email = widgets["email"].get().strip()
+            new_pass = widgets["password"].get().strip()
+
+            # Ràng buộc dữ liệu
+            if len(new_name) < 3:
+                return messagebox.showwarning("Lỗi", "Họ tên quá ngắn (tối thiểu 3 ký tự).")
+            if not is_valid_phone(new_phone):
+                return messagebox.showwarning("Lỗi", "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0).")
+            if not is_valid_email(new_email):
+                return messagebox.showwarning("Lỗi", "Định dạng email không hợp lệ.")
+            if not is_valid_password(new_pass):
+                return messagebox.showwarning("Lỗi", "Mật khẩu quá ngắn (tối thiểu 3 ký tự).")
+
+            # Cập nhật thông tin
+            hdv_data["tenHDV"] = new_name
+            hdv_data["sdt"] = new_phone
+            hdv_data["email"] = new_email
+            hdv_data["password"] = new_pass
             
             app["ql"].save()
             messagebox.showinfo("Thành công", "Đã cập nhật thông tin cá nhân thành công!")

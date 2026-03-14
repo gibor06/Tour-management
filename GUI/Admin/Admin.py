@@ -347,7 +347,7 @@ def dashboard_tab(app):
 # QUẢN LÝ HƯỚNG DẪN VIÊN (HDV MANAGEMENT)
 def validate_hdv(app, form_data, old_ma=None):
     """Kiểm tra tính hợp lệ của dữ liệu hướng dẫn viên trước khi lưu."""
-    required = ["maHDV", "tenHDV", "sdt", "email", "kn", "gioiTinh", "khuVuc", "trangThai"]
+    required = ["maHDV", "tenHDV", "sdt", "email", "kn", "gioiTinh", "khuVuc", "trangThai", "password"]
     
     # 1. Kiểm tra để trống
     if not all(form_data.get(k, "").strip() for k in required):
@@ -357,9 +357,11 @@ def validate_hdv(app, form_data, old_ma=None):
     if not re.fullmatch(r"HDV\d{2,}", form_data["maHDV"]):
         return False, "Mã HDV phải theo dạng HDV01, HDV02..."
     
-    # 3. Kiểm tra độ dài tên
+    # 3. Kiểm tra độ dài tên và mật khẩu
     if len(form_data["tenHDV"].strip()) < 3:
-        return False, "Tên HDV quá ngắn."
+        return False, "Tên HDV quá ngắn (tối thiểu 3 ký tự)."
+    if len(form_data["password"].strip()) < 3:
+        return False, "Mật khẩu quá ngắn (tối thiểu 3 ký tự)."
     
     # 4. Kiểm tra số điện thoại và email
     if not is_valid_phone(form_data["sdt"]):
@@ -633,8 +635,16 @@ def open_user_form(app, data=None):
 
     def save():
         new_user = {k: v.get().strip() for k, v in widgets.items()}
+        
+        # Ràng buộc dữ liệu
         if not all([new_user["username"], new_user["password"], new_user["fullname"]]):
-            return messagebox.showwarning("Lỗi", "Vui lòng nhập đủ thông tin!")
+            return messagebox.showwarning("Lỗi", "Vui lòng nhập đủ các trường bắt buộc!", parent=top)
+            
+        if not is_valid_phone(new_user["sdt"]):
+            return messagebox.showwarning("Lỗi", "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0).", parent=top)
+            
+        if len(new_user["password"]) < 3:
+            return messagebox.showwarning("Lỗi", "Mật khẩu phải có ít nhất 3 ký tự.", parent=top)
 
         if data:
             for i, u in enumerate(app["ql"].list_users):
@@ -643,7 +653,7 @@ def open_user_form(app, data=None):
                     break
         else:
             if app["ql"].find_user(new_user["username"]):
-                return messagebox.showerror("Lỗi", "Tên đăng nhập đã tồn tại!")
+                return messagebox.showerror("Lỗi", "Tên đăng nhập đã tồn tại!", parent=top)
             app["ql"].list_users.append(new_user)
 
         app["ql"].save()

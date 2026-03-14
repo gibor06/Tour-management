@@ -6,6 +6,19 @@ from tkinter import messagebox, ttk
 from datetime import datetime
 import copy
 
+# CÁC HÀM KIỂM TRA DỮ LIỆU (VALIDATION)
+def is_valid_phone(phone):
+    """Kiểm tra số điện thoại (10 chữ số, bắt đầu bằng số 0)."""
+    return bool(re.fullmatch(r"0\d{9}", phone))
+
+def is_valid_password(pwd):
+    """Kiểm tra mật khẩu (tối thiểu 3 ký tự)."""
+    return len(pwd) >= 3
+
+def is_valid_fullname(name):
+    """Kiểm tra họ tên (tối thiểu 3 ký tự)."""
+    return len(name.strip()) >= 3
+
 # CẤU HÌNH GIAO DIỆN (THEME)
 THEME = {
     "bg": "#f8fafc",        # Màu nền chính
@@ -435,8 +448,22 @@ def khoi_tao_khach(root, user_data=None):
             widgets[key] = e
 
         def save_profile():
-            for key, entry in widgets.items():
-                user_info[key] = entry.get().strip()
+            new_fullname = widgets["fullname"].get().strip()
+            new_phone = widgets["sdt"].get().strip()
+            new_pass = widgets["password"].get().strip()
+
+            # Ràng buộc dữ liệu
+            if not is_valid_fullname(new_fullname):
+                return messagebox.showwarning("Lỗi", "Họ tên quá ngắn (tối thiểu 3 ký tự).")
+            if not is_valid_phone(new_phone):
+                return messagebox.showwarning("Lỗi", "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0).")
+            if not is_valid_password(new_pass):
+                return messagebox.showwarning("Lỗi", "Mật khẩu quá ngắn (tối thiểu 3 ký tự).")
+
+            # Cập nhật thông tin
+            user_info["fullname"] = new_fullname
+            user_info["sdt"] = new_phone
+            user_info["password"] = new_pass
             
             app["ql"].save()
             # Cập nhật lại tên hiển thị trên Sidebar ngay lập tức
