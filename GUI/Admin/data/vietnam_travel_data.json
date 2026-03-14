@@ -30,7 +30,7 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Đang dẫn tour"
     },
     {
       "maHDV": "HDV04",
@@ -534,7 +534,7 @@
       "gia": "4500000",
       "diemDi": "TP.HCM",
       "diemDen": "Phú Quốc",
-      "trangThai": "Mở bán",
+      "trangThai": "Đã chốt",
       "hdvPhuTrach": "HDV03"
     },
     {
@@ -703,6 +703,12 @@
       "password": "123",
       "fullname": "Trần Gia Bảo",
       "sdt": "0988111222"
+    },
+    {
+      "username": "KH01",
+      "password": "123",
+      "fullname": "Nguyễn Thị Phương Nhung",
+      "sdt": "0909111222"
     }
   ],
   "admin": {

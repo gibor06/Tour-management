@@ -189,20 +189,33 @@ def khoi_tao_hdv(root, user_data=None):
     
     # Sử dụng .get() để tránh lỗi KeyError nếu thiếu dữ liệu
     ten_hdv = user_data.get("tenHDV", "Hướng Dẫn Viên") if user_data else "Hướng Dẫn Viên"
-    tk.Label(sidebar, text=f"XIN CHÀO,\n{ten_hdv}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 14, "bold"), pady=10).pack(fill="x")
+    tk.Label(sidebar, text=f"XIN CHÀO,\n{ten_hdv}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 11, "bold"), pady=10).pack(fill="x")
 
     menu = tk.Frame(sidebar, bg=THEME["sidebar"])
     menu.pack(fill="x", padx=10, pady=20)
 
     def menu_btn(text, cmd):
-        btn = tk.Button(
-            menu, text=f"   {text}", bg=THEME["sidebar"], fg="white", activebackground="#1e293b", activeforeground="white",
-            relief="flat", bd=0, cursor="hand2", anchor="w", font=("Times New Roman", 14, "bold"),
-            padx=16, pady=14, command=cmd
+        """Hàm tạo nút bấm menu nhanh."""
+        return tk.Button(
+            menu,
+            text=f"   {text}",
+            bg=THEME["sidebar"],
+            fg="white",
+            activebackground="#1e293b",
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            anchor="w",
+            font=("Times New Roman", 14, "bold"),
+            padx=16,
+            pady=14,
+            command=cmd,
         )
-        btn.pack(fill="x", pady=4)
-        return btn
 
+    # Thêm các nút điều hướng
+    # (Di chuyển xuống sau khi định nghĩa các hàm tab để tránh lỗi NameError)
+    
     # --- NỘI DUNG CHÍNH (Right Panel) ---
     right_panel = tk.Frame(root, bg=THEME["bg"])
     right_panel.pack(side="left", fill="both", expand=True)
@@ -399,14 +412,17 @@ def khoi_tao_hdv(root, user_data=None):
         style_button(card, "CẬP NHẬT THÔNG TIN", THEME["success"], save_profile).pack(pady=20)
 
     # --- ĐĂNG KÝ NÚT MENU ---
-    menu_btn("Lịch Trình Tour", tab_danh_sach_tour)
-    menu_btn("Hiệu Suất & Đánh Giá", tab_thong_ke)
-    menu_btn("Gửi Thông Báo", tab_thong_bao)
-    menu_btn("Cài Đặt Tài Khoản", tab_cai_dat)
+    menu_btn("Lịch Trình Tour", tab_danh_sach_tour).pack(fill="x", pady=4)
+    menu_btn("Hiệu Suất & Đánh Giá", tab_thong_ke).pack(fill="x", pady=4)
+    menu_btn("Gửi Thông Báo", tab_thong_bao).pack(fill="x", pady=4)
+    menu_btn("Cài Đặt Tài Khoản", tab_cai_dat).pack(fill="x", pady=4)
     
-    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=10)
+    # Đường kẻ ngăn cách
+    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=16)
     
-    style_button(sidebar, "Đăng Xuất", THEME["danger"], lambda: logout_system(root)).pack(fill="x", side="bottom", padx=10, pady=20)
+    tk.Button(sidebar, text="   Đăng Xuất", bg=THEME["sidebar"], fg="white", activebackground="#1e293b", activeforeground="white",
+              relief="flat", bd=0, cursor="hand2", anchor="w", font=("Times New Roman", 14, "bold"),
+              padx=16, pady=14, command=lambda: logout_system(root)).pack(fill="x", side="bottom", padx=10, pady=20)
 
     tab_danh_sach_tour() # Mở mặc định
 
