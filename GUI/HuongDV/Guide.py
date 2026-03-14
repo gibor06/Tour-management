@@ -41,7 +41,8 @@ DEFAULT_DATA = {
             "kn": "5",
             "gioiTinh": "Nam",
             "khuVuc": "Miền Bắc",
-            "trangThai": "Sẵn sàng"
+            "trangThai": "Sẵn sàng",
+            "password": "123"
         },
         {
             "maHDV": "HDV02",
@@ -51,18 +52,21 @@ DEFAULT_DATA = {
             "kn": "3",
             "gioiTinh": "Nam",
             "khuVuc": "Miền Trung",
-            "trangThai": "Đang dẫn tour"
+            "trangThai": "Đang dẫn tour",
+            "password": "123"
         }
     ],
     "tours": [],
-    "bookings": []
+    "bookings": [],
+    "users": [],
+    "admin": {"username": "admin", "password": "123"}
 }
 
 class DataStore:
     """Lớp quản lý việc lưu trữ và truy xuất dữ liệu từ file JSON."""
     def __init__(self, path=DATA_FILE):
         self.path = path
-        self.data = {"hdv": [], "tours": [], "bookings": []}
+        self.data = {"hdv": [], "tours": [], "bookings": [], "users": [], "admin": {}}
         self.load()
 
     def load(self):
@@ -76,10 +80,23 @@ class DataStore:
             with open(self.path, "r", encoding="utf-8") as f:
                 self.data = json.load(f)
 
-            # Đảm bảo các khóa cần thiết luôn tồn tại dưới dạng danh sách
-            for key in ["hdv", "tours", "bookings"]:
+            # Đảm bảo các khóa cần thiết luôn tồn tại
+            for key in ["hdv", "tours", "bookings", "users"]:
                 if key not in self.data or not isinstance(self.data[key], list):
                     self.data[key] = []
+            
+            # Cập nhật mật khẩu mặc định cho các tài khoản HDV nếu thiếu
+            for default_h in DEFAULT_DATA["hdv"]:
+                h = self.find_hdv(default_h["maHDV"])
+                if h and "password" not in h:
+                    h["password"] = default_h["password"]
+            
+            # Đảm bảo có tài khoản khách hàng mặc định nếu danh sách trống
+            if not self.data["users"] and DEFAULT_DATA["users"]:
+                self.data["users"] = copy.deepcopy(DEFAULT_DATA["users"])
+
+            if "admin" not in self.data or not self.data["admin"]:
+                self.data["admin"] = DEFAULT_DATA["admin"]
 
         except Exception:
             self.data = copy.deepcopy(DEFAULT_DATA)
@@ -100,6 +117,11 @@ class DataStore:
     def list_tours(self): return self.data["tours"]
     @property
     def list_bookings(self): return self.data["bookings"]
+    @property
+    def list_users(self): return self.data["users"]
+
+    def find_user(self, username):
+        return next((u for u in self.list_users if u["username"] == username), None)
 
     def find_hdv(self, ma_hdv):
         return next((h for h in self.list_hdv if h["maHDV"] == ma_hdv), None)
@@ -338,13 +360,59 @@ def khoi_tao_hdv(root, user_data=None):
         style_button(card, "XÁC NHẬN GỬI THÔNG BÁO", THEME["danger"], 
                      lambda: messagebox.showinfo("Thành công", "Đã gửi thông báo đến toàn bộ khách hàng!")).pack()
 
+    # --- TAB: CÀI ĐẶT TÀI KHOẢN ---
+    def tab_cai_dat():
+        clear_container()
+        tk.Label(content_area, text="CÀI ĐẶT TÀI KHOẢN CÁ NHÂN", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
+        
+        card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=30, pady=30)
+        card.pack(pady=10)
+
+        # Tìm dữ liệu HDV hiện tại
+        ma_hdv = user_data.get("maHDV", "")
+        hdv_data = app["ql"].find_hdv(ma_hdv)
+        
+        if not hdv_data:
+            tk.Label(card, text="Lỗi: Không tìm thấy thông tin tài khoản!", fg=THEME["danger"], bg=THEME["surface"]).pack()
+            return
+
+        fields = [("Họ và tên", "tenHDV"), ("Số điện thoại", "sdt"), ("Email", "email"), ("Mật khẩu mới", "password")]
+        widgets = {}
+
+        for label, key in fields:
+            row = tk.Frame(card, bg=THEME["surface"])
+            row.pack(fill="x", pady=8)
+            tk.Label(row, text=label, width=15, anchor="w", bg=THEME["surface"], font=("Times New Roman", 12, "bold")).pack(side="left")
+            e = tk.Entry(row, font=("Times New Roman", 12), relief="solid", bd=1, width=30)
+            e.pack(side="left", ipady=3)
+            e.insert(0, hdv_data.get(key, ""))
+            widgets[key] = e
+
+        def save_profile():
+            for key, entry in widgets.items():
+                hdv_data[key] = entry.get().strip()
+            
+            app["ql"].save()
+            messagebox.showinfo("Thành công", "Đã cập nhật thông tin cá nhân thành công!")
+            tab_cai_dat()
+
+        style_button(card, "CẬP NHẬT THÔNG TIN", THEME["success"], save_profile).pack(pady=20)
+
     # --- ĐĂNG KÝ NÚT MENU ---
     menu_btn("Lịch Trình Tour", tab_danh_sach_tour)
     menu_btn("Hiệu Suất & Đánh Giá", tab_thong_ke)
     menu_btn("Gửi Thông Báo", tab_thong_bao)
+    menu_btn("Cài Đặt Tài Khoản", tab_cai_dat)
     
     tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=10)
     
-    style_button(sidebar, "Đăng Xuất", THEME["danger"], root.quit).pack(fill="x", side="bottom", padx=10, pady=20)
+    style_button(sidebar, "Đăng Xuất", THEME["danger"], lambda: logout_system(root)).pack(fill="x", side="bottom", padx=10, pady=20)
 
     tab_danh_sach_tour() # Mở mặc định
+
+def logout_system(root):
+    if messagebox.askyesno("Xác nhận", "Bạn có muốn đăng xuất khỏi hệ thống?"):
+        from ChayUD import TravelSystem
+        for widget in root.winfo_children():
+            widget.destroy()
+        TravelSystem(root)

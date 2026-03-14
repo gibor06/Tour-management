@@ -1,4 +1,4 @@
-﻿import json
+import json
 import os
 import re
 import tkinter as tk
@@ -40,7 +40,8 @@ DEFAULT_DATA = {
             "kn": "5",
             "gioiTinh": "Nam",
             "khuVuc": "Miền Bắc",
-            "trangThai": "Sẵn sàng"
+            "trangThai": "Sẵn sàng",
+            "password": "123"
         },
         {
             "maHDV": "HDV02",
@@ -50,7 +51,8 @@ DEFAULT_DATA = {
             "kn": "3",
             "gioiTinh": "Nam",
             "khuVuc": "Miền Trung",
-            "trangThai": "Đang dẫn tour"
+            "trangThai": "Đang dẫn tour",
+            "password": "123"
         }
     ],
     "tours": [
@@ -85,24 +87,12 @@ DEFAULT_DATA = {
             "sdt": "0988111222",
             "soNguoi": "2",
             "trangThai": "Đã cọc"
-        },
-        {
-            "maBooking": "BK02",
-            "maTour": "T01",
-            "tenKhach": "Phạm Hải Yến",
-            "sdt": "0977222333",
-            "soNguoi": "3",
-            "trangThai": "Đã thanh toán"
-        },
-        {
-            "maBooking": "BK03",
-            "maTour": "T02",
-            "tenKhach": "Lê Minh Tâm",
-            "sdt": "0933444555",
-            "soNguoi": "2",
-            "trangThai": "Đã cọc"
         }
-    ]
+    ],
+    "users": [
+        {"username": "Khach", "password": "123", "fullname": "Khách hàng mẫu", "sdt": "0988111222"}
+    ],
+    "admin": {"username": "admin", "password": "123"}
 }
 
 
@@ -111,7 +101,7 @@ class DataStore:
 
     def __init__(self, path=DATA_FILE):
         self.path = path
-        self.data = {"hdv": [], "tours": [], "bookings": []}
+        self.data = {"hdv": [], "tours": [], "bookings": [], "users": [], "admin": {}}
         self.load()
 
     def load(self):
@@ -125,20 +115,25 @@ class DataStore:
             with open(self.path, "r", encoding="utf-8") as f:
                 self.data = json.load(f)
 
-            # Đảm bảo các khóa cần thiết luôn tồn tại dưới dạng danh sách
-            for key in ["hdv", "tours", "bookings"]:
+            # Đảm bảo các khóa cần thiết luôn tồn tại
+            for key in ["hdv", "tours", "bookings", "users"]:
                 if key not in self.data or not isinstance(self.data[key], list):
                     self.data[key] = []
+            
+            # Cập nhật mật khẩu mặc định cho các tài khoản HDV nếu thiếu
+            for default_h in DEFAULT_DATA["hdv"]:
+                h = self.find_hdv(default_h["maHDV"])
+                if h and "password" not in h:
+                    h["password"] = default_h["password"]
+            
+            # Đảm bảo có tài khoản khách hàng mặc định nếu danh sách trống
+            if not self.data["users"] and DEFAULT_DATA["users"]:
+                self.data["users"] = copy.deepcopy(DEFAULT_DATA["users"])
+
+            if "admin" not in self.data or not self.data["admin"]:
+                self.data["admin"] = DEFAULT_DATA["admin"]
 
         except Exception:
-            # Nếu file bị hỏng, sao lưu file cũ và nạp lại mặc định
-            backup = self.path + ".broken"
-            try:
-                if os.path.exists(self.path):
-                    os.replace(self.path, backup)
-            except Exception:
-                pass
-
             self.data = copy.deepcopy(DEFAULT_DATA)
             self.save()
 
@@ -152,19 +147,17 @@ class DataStore:
             json.dump(self.data, f, ensure_ascii=False, indent=2)
 
     @property
-    def list_hdv(self):
-        """Trả về danh sách hướng dẫn viên."""
-        return self.data["hdv"]
-
+    def list_hdv(self): return self.data["hdv"]
     @property
-    def list_tours(self):
-        """Trả về danh sách tour."""
-        return self.data["tours"]
-
+    def list_tours(self): return self.data["tours"]
     @property
-    def list_bookings(self):
-        """Trả về danh sách đặt chỗ (booking)."""
-        return self.data["bookings"]
+    def list_bookings(self): return self.data["bookings"]
+    @property
+    def list_users(self): return self.data["users"]
+
+    def find_user(self, username):
+        """Tìm người dùng theo username."""
+        return next((u for u in self.list_users if u["username"] == username), None)
 
     def find_hdv(self, ma_hdv):
         """Tìm hướng dẫn viên theo mã."""
@@ -439,6 +432,7 @@ def open_hdv_form(app, data=None):
     fields = [
         ("Mã HDV", "maHDV", "entry"),
         ("Tên HDV", "tenHDV", "entry"),
+        ("Mật khẩu", "password", "entry"),
         ("Số điện thoại", "sdt", "entry"),
         ("Email", "email", "entry"),
         ("Kinh nghiệm (năm)", "kn", "entry"),
@@ -589,6 +583,115 @@ def admin_hdv_tab(app):
     sy.pack(side="right", fill="y")
 
     refresh_hdv(app, app["search_hdv_var"].get())
+
+
+
+# QUẢN LÝ KHÁCH HÀNG (USER MANAGEMENT)
+
+def refresh_users(app, keyword=""):
+    """Làm mới danh sách khách hàng."""
+    tree = app["tv_users"]
+    for item in tree.get_children():
+        tree.delete(item)
+
+    rows = app["ql"].list_users
+    if keyword:
+        kw = keyword.lower().strip()
+        rows = [u for u in rows if kw in u["username"].lower() or kw in u["fullname"].lower()]
+
+    for u in rows:
+        tree.insert("", "end", values=(u["username"], u["fullname"], u.get("sdt", "N/A"), u.get("password", "****")))
+    apply_zebra(tree)
+
+def open_user_form(app, data=None):
+    """Mở form thêm/sửa khách hàng."""
+    top = tk.Toplevel(app["root"])
+    top.title("Thông tin Khách hàng")
+    top.geometry("450x450")
+    top.configure(bg=THEME["bg"])
+    top.transient(app["root"])
+    top.grab_set()
+
+    card = tk.Frame(top, bg=THEME["surface"], bd=1, relief="solid")
+    card.pack(fill="both", expand=True, padx=20, pady=20)
+
+    tk.Label(card, text="QUẢN LÝ KHÁCH HÀNG", bg=THEME["surface"], font=("Times New Roman", 16, "bold")).pack(pady=15)
+
+    fields = [("Tên đăng nhập", "username"), ("Mật khẩu", "password"), ("Họ và tên", "fullname"), ("Số điện thoại", "sdt")]
+    widgets = {}
+
+    for label, key in fields:
+        row = tk.Frame(card, bg=THEME["surface"])
+        row.pack(fill="x", padx=20, pady=5)
+        tk.Label(row, text=label, width=15, anchor="w", bg=THEME["surface"], font=("Times New Roman", 12)).pack(side="left")
+        e = tk.Entry(row, font=("Times New Roman", 12), relief="solid", bd=1)
+        e.pack(side="left", fill="x", expand=True, ipady=3)
+        if data: e.insert(0, data.get(key, ""))
+        widgets[key] = e
+
+    if data: widgets["username"].config(state="disabled")
+
+    def save():
+        new_user = {k: v.get().strip() for k, v in widgets.items()}
+        if not all([new_user["username"], new_user["password"], new_user["fullname"]]):
+            return messagebox.showwarning("Lỗi", "Vui lòng nhập đủ thông tin!")
+
+        if data:
+            for i, u in enumerate(app["ql"].list_users):
+                if u["username"] == data["username"]:
+                    app["ql"].list_users[i].update(new_user)
+                    break
+        else:
+            if app["ql"].find_user(new_user["username"]):
+                return messagebox.showerror("Lỗi", "Tên đăng nhập đã tồn tại!")
+            app["ql"].list_users.append(new_user)
+
+        app["ql"].save()
+        refresh_users(app)
+        top.destroy()
+        set_status(app, "Đã lưu khách hàng thành công", THEME["success"])
+
+    style_button(card, "Lưu thông tin", THEME["success"], save).pack(pady=20)
+
+def delete_user(app):
+    sel = app["tv_users"].selection()
+    if not sel: return
+    username = app["tv_users"].item(sel[0])["values"][0]
+    if messagebox.askyesno("Xác nhận", f"Xóa khách hàng {username}?"):
+        app["ql"].data["users"] = [u for u in app["ql"].list_users if u["username"] != username]
+        app["ql"].save()
+        refresh_users(app)
+        set_status(app, f"Đã xóa khách hàng {username}", THEME["danger"])
+
+def admin_user_tab(app):
+    """Tab quản lý khách hàng."""
+    clear_container(app)
+    tk.Label(app["container"], text="QUẢN LÝ DANH SÁCH KHÁCH HÀNG", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 10))
+
+    toolbar = tk.Frame(app["container"], bg=THEME["bg"])
+    toolbar.pack(fill="x", pady=10)
+    style_button(toolbar, "Thêm khách mới", THEME["success"], lambda: open_user_form(app)).pack(side="left", padx=5)
+    style_button(toolbar, "Sửa thông tin", THEME["primary"], 
+                 lambda: open_user_form(app, app["ql"].find_user(app["tv_users"].item(app["tv_users"].selection()[0])["values"][0]) if app["tv_users"].selection() else None)).pack(side="left", padx=5)
+    style_button(toolbar, "Xóa khách", THEME["danger"], lambda: delete_user(app)).pack(side="left", padx=5)
+
+    wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
+    wrapper.pack(fill="both", expand=True)
+
+    cols = ("user", "name", "sdt", "pass")
+    tv = ttk.Treeview(wrapper, columns=cols, show="headings")
+    app["tv_users"] = tv
+    
+    headers = [("user", "Tên đăng nhập"), ("name", "Họ và tên"), ("sdt", "Số điện thoại"), ("pass", "Mật khẩu")]
+    for id, txt in headers:
+        tv.heading(id, text=txt)
+        tv.column(id, anchor="center", width=150)
+
+    tv.pack(side="left", fill="both", expand=True)
+    sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+    tv.configure(yscrollcommand=sy.set)
+    sy.pack(side="right", fill="y")
+    refresh_users(app)
 
 
 # QUẢN LÝ TOUR / CHUYẾN ĐI (TOUR MANAGEMENT)
@@ -1176,9 +1279,13 @@ def manual_save(app):
 
 
 def logout(app):
-    """Xác nhận và đóng ứng dụng."""
+    """Xác nhận và đăng xuất, quay lại màn hình đăng nhập."""
     if messagebox.askyesno("Đăng xuất", "Bạn có chắc chắn muốn thoát khỏi hệ thống quản trị?"):
-        app["root"].destroy()
+        # Import cục bộ để tránh vòng lặp import
+        from ChayUD import TravelSystem
+        for widget in app["root"].winfo_children():
+            widget.destroy()
+        TravelSystem(app["root"])
 
 
 # CHƯƠNG TRÌNH CHÍNH (MAIN APPLICATION)
@@ -1261,6 +1368,7 @@ def main(root=None):
     # Thêm các nút điều hướng
     menu_btn("Tổng quan Dashboard", lambda: dashboard_tab(app)).pack(fill="x", pady=4)
     menu_btn("Quản lý HDV", lambda: admin_hdv_tab(app)).pack(fill="x", pady=4)
+    menu_btn("Quản lý Khách hàng", lambda: admin_user_tab(app)).pack(fill="x", pady=4)
     menu_btn("Quản lý Tour", lambda: admin_tour_tab(app)).pack(fill="x", pady=4)
     menu_btn("Quản lý Booking", lambda: admin_booking_tab(app)).pack(fill="x", pady=4)
     menu_btn("Lưu dữ liệu JSON", lambda: manual_save(app)).pack(fill="x", pady=4)

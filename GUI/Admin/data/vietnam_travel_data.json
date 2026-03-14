@@ -8,7 +8,8 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "123"
     },
     {
       "maHDV": "HDV02",
@@ -18,7 +19,8 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "123"
     },
     {
       "maHDV": "HDV03",
@@ -694,5 +696,17 @@
       "soNguoi": "3",
       "trangThai": "Đã thanh toán"
     }
-  ]
+  ],
+  "users": [
+    {
+      "username": "Khach",
+      "password": "123",
+      "fullname": "Trần Gia Bảo",
+      "sdt": "0988111222"
+    }
+  ],
+  "admin": {
+    "username": "admin",
+    "password": "123"
+  }
 }

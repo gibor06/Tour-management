@@ -1,145 +1,445 @@
+import json
+import os
+import re
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox, ttk
+from datetime import datetime
+import copy
+
+# CẤU HÌNH GIAO DIỆN (THEME)
+THEME = {
+    "bg": "#f8fafc",        # Màu nền chính
+    "surface": "#ffffff",   # Màu nền các thẻ/panel
+    "sidebar": "#0f172a",   # Màu nền thanh menu bên trái
+    "primary": "#2563eb",   # Màu chính
+    "success": "#059669",   # Màu thành công/lưu
+    "danger": "#dc2626",    # Màu cảnh báo/xóa
+    "warning": "#d97706",   # Màu cảnh báo/chú ý
+    "text": "#0f172a",      # Màu chữ chính
+    "muted": "#64748b",     # Màu chữ phụ 
+    "border": "#cbd5e1",    # Màu đường viền
+    "note_bg": "#fff7ed",   # Màu nền ghi chú 
+    "note_fg": "#9a3412",   # Màu chữ ghi chú
+    "zebra_even": "#f8fafc", # Màu dòng chẵn bảng 
+    "zebra_odd": "#ffffff",  # Màu dòng lẻ bảng
+}
+
+# Đường dẫn tệp dữ liệu JSON (Dùng chung với Admin)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+DATA_DIR = os.path.join(BASE_DIR, "Admin", "data")
+DATA_FILE = os.path.join(DATA_DIR, "vietnam_travel_data.json")
+
+# Dữ liệu mặc định nếu không tìm thấy tệp JSON
+DEFAULT_DATA = {
+    "hdv": [
+        {
+            "maHDV": "HDV01",
+            "tenHDV": "Nguyễn Văn Anh",
+            "sdt": "0901234567",
+            "email": "anh@travel.com",
+            "kn": "5",
+            "gioiTinh": "Nam",
+            "khuVuc": "Miền Bắc",
+            "trangThai": "Sẵn sàng",
+            "password": "123"
+        },
+        {
+            "maHDV": "HDV02",
+            "tenHDV": "Trần Minh Khoa",
+            "sdt": "0912345678",
+            "email": "khoa@travel.com",
+            "kn": "3",
+            "gioiTinh": "Nam",
+            "khuVuc": "Miền Trung",
+            "trangThai": "Đang dẫn tour",
+            "password": "123"
+        }
+    ],
+    "tours": [],
+    "bookings": [],
+    "users": [],
+    "admin": {"username": "admin", "password": "123"}
+}
+
+class DataStore:
+    """Lớp quản lý việc nạp và lưu dữ liệu JSON."""
+    def __init__(self, path=DATA_FILE):
+        self.path = path
+        self.data = {"hdv": [], "tours": [], "bookings": [], "users": [], "admin": {}}
+        self.load()
+
+    def load(self):
+        """Tải dữ liệu từ tệp JSON. Nếu tệp lỗi hoặc không tồn tại, sử dụng dữ liệu mặc định."""
+        if not os.path.exists(self.path):
+            self.data = copy.deepcopy(DEFAULT_DATA)
+            self.save()
+            return
+
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                self.data = json.load(f)
+
+            # Đảm bảo các khóa cần thiết luôn tồn tại
+            for key in ["hdv", "tours", "bookings", "users"]:
+                if key not in self.data or not isinstance(self.data[key], list):
+                    self.data[key] = []
+            
+            # Cập nhật mật khẩu mặc định cho các tài khoản HDV nếu thiếu
+            for default_h in DEFAULT_DATA["hdv"]:
+                h = self.find_hdv(default_h["maHDV"])
+                if h and "password" not in h:
+                    h["password"] = default_h["password"]
+            
+            # Đảm bảo có tài khoản khách hàng mặc định nếu danh sách trống
+            if not self.data["users"] and DEFAULT_DATA["users"]:
+                self.data["users"] = copy.deepcopy(DEFAULT_DATA["users"])
+
+            if "admin" not in self.data or not self.data["admin"]:
+                self.data["admin"] = DEFAULT_DATA["admin"]
+
+        except Exception:
+            self.data = copy.deepcopy(DEFAULT_DATA)
+            self.save()
+
+    def save(self):
+        """Lưu trạng thái dữ liệu hiện tại vào tệp JSON."""
+        folder = os.path.dirname(self.path)
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump(self.data, f, ensure_ascii=False, indent=2)
+
+    @property
+    def list_hdv(self): return self.data["hdv"]
+    @property
+    def list_tours(self): return self.data["tours"]
+    @property
+    def list_bookings(self): return self.data["bookings"]
+    @property
+    def list_users(self): return self.data["users"]
+
+    def find_user(self, username):
+        return next((u for u in self.list_users if u["username"] == username), None)
+
+    def find_tour(self, ma_tour):
+        return next((t for t in self.list_tours if t["ma"] == ma_tour), None)
+
+    def find_hdv(self, ma_hdv):
+        return next((h for h in self.list_hdv if h["maHDV"] == ma_hdv), None)
+
+    def get_occupied_seats(self, ma_tour):
+        total = 0
+        for b in self.list_bookings:
+            if b.get("maTour") == ma_tour:
+                try: total += int(b.get("soNguoi", 0))
+                except: pass
+        return total
+
+# --- CÁC HÀM TIỆN ÍCH ---
+def apply_zebra(tree):
+    tree.tag_configure("odd", background=THEME["zebra_odd"])
+    tree.tag_configure("even", background=THEME["zebra_even"])
+    for i, item in enumerate(tree.get_children()):
+        tree.item(item, tags=(("even" if i % 2 == 0 else "odd"),))
+
+def style_button(parent, text, bg, command, fg="white"):
+    return tk.Button(
+        parent, text=text, bg=bg, fg=fg, activebackground=bg, activeforeground=fg,
+        relief="flat", bd=0, cursor="hand2", font=("Times New Roman", 12, "bold"),
+        padx=14, pady=8, command=command
+    )
+
+def safe_int(value):
+    try: return int(value)
+    except: return 0
 
 def khoi_tao_khach(root, user_data=None):
-    # Xóa giao diện cũ để nạp giao diện Dashboard
-    for widget in root.winfo_children():
-        widget.destroy()
-
-    # --- CẤU HÌNH MÀU SẮC & FONT ---
-    COLOR_SIDEBAR = "#1e293b"
-    COLOR_BG = "#f1f5f9"
-    COLOR_CARD = "#ffffff"
-    COLOR_PRIMARY = "#2563eb"
-    COLOR_SUCCESS = "#10b981"
+    """Khởi tạo giao diện chính cho Khách hàng."""
     
-    FONT_TNR = ("Times New Roman", 14)
-    FONT_BOLD = ("Times New Roman", 14, "bold")
+    if not user_data:
+        user_data = {"name": "Khách hàng", "id": "KH01"}
 
-    # --- DỮ LIỆU GỐC (GIẢ LẬP) ---
-    # Cấu trúc: [Mã, Địa điểm, Thời gian, Phương tiện, HDV, SĐT HDV, Đã ĐK, Đánh giá]
-    ds_tour_goc = [
-        ["T001", "Hà Giang - Lũng Cú", "3 ngày 2 đêm", "Ô tô", "Nguyễn Văn An", "0901.222.333", 15, "4.9 ⭐"],
-        ["T002", "Đà Nẵng - Hội An", "4 ngày 3 đêm", "Máy bay", "Trần Thị Bình", "0905.111.222", 22, "4.8 ⭐"],
-        ["T003", "Vịnh Hạ Long", "2 ngày 1 đêm", "Du thuyền", "Lê Minh", "0912.444.555", 10, "5.0 ⭐"],
-        ["T004", "Sapa - Fansipan", "3 ngày 2 đêm", "Tàu hỏa", "Hoàng Dũng", "0988.777.888", 18, "4.7 ⭐"]
-    ]
-    ds_da_dat = [] # Lưu các tour khách đã bấm đăng ký
+    app = {
+        "root": root,
+        "ql": DataStore(),
+        "user": user_data,
+        "container": None,
+        "tv_tours": None,
+        "detail_var": tk.StringVar(value="Chọn một tour để xem chi tiết và đăng ký.")
+    }
+
+    # Style Treeview
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure("Treeview", font=("Times New Roman", 12), rowheight=32, background=THEME["surface"], fieldbackground=THEME["surface"], foreground=THEME["text"])
+    style.configure("Treeview.Heading", font=("Times New Roman", 12, "bold"), background="#e2e8f0", foreground=THEME["text"])
+    style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", THEME["text"])])
 
     # --- SIDEBAR ---
-    sidebar = tk.Frame(root, bg=COLOR_SIDEBAR, width=280)
+    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=260)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    tk.Label(sidebar, text="VIETNAM\nTRAVEL", bg=COLOR_SIDEBAR, fg="#38bdf8", 
-             font=("Times New Roman", 22, "bold")).pack(pady=40)
+    tk.Label(sidebar, text="VIETNAM\nTRAVEL", justify="center", bg=THEME["sidebar"], fg="#10b981", font=("Times New Roman", 19, "bold"), pady=24).pack(fill="x")
+    
+    tk.Label(sidebar, text=f"XIN CHÀO,\n{user_data.get('name', 'Khách hàng')}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 11, "bold"), pady=10).pack(fill="x")
 
-    # --- KHUNG NỘI DUNG CHÍNH ---
-    content_area = tk.Frame(root, bg=COLOR_BG)
-    content_area.pack(side="right", fill="both", expand=True)
+    menu = tk.Frame(sidebar, bg=THEME["sidebar"])
+    menu.pack(fill="x", padx=10, pady=20)
 
-    def xoa_khung_cu():
+    def menu_btn(text, cmd):
+        return tk.Button(
+            menu, text=f"   {text}", bg=THEME["sidebar"], fg="white", activebackground="#1e293b", activeforeground="white",
+            relief="flat", bd=0, cursor="hand2", anchor="w", font=("Times New Roman", 14, "bold"),
+            padx=16, pady=14, command=cmd
+        ).pack(fill="x", pady=4)
+
+    # --- NỘI DUNG CHÍNH (Right Panel) ---
+    right_panel = tk.Frame(root, bg=THEME["bg"])
+    right_panel.pack(side="left", fill="both", expand=True) # Đổi side="right" thành "left" để ổn định hơn
+    
+    content_area = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=20)
+    content_area.pack(fill="both", expand=True)
+    app["container"] = content_area
+
+    def clear_container():
         for widget in content_area.winfo_children():
             widget.destroy()
 
-    # --- TAB 1: DANH SÁCH & ĐĂNG KÝ ---
-    def show_danh_sach():
-        xoa_khung_cu()
+    # --- TAB: DANH SÁCH TOUR ---
+    def tab_danh_sach_tour():
+        clear_container()
+        tk.Label(content_area, text="KHÁM PHÁ CÁC TOUR DU LỊCH", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 15))
         
-        # 1. Chọn phương tiện
-        filter_fr = tk.LabelFrame(content_area, text="Lựa chọn phương tiện ", font=FONT_BOLD, bg=COLOR_CARD, fg=COLOR_PRIMARY)
-        filter_fr.pack(fill="x", padx=20, pady=10)
+        # Bảng danh sách tour
+        wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
+        wrapper.pack(fill="x")
+        
+        cols = ("ma", "ten", "ngay", "gia", "khach", "tt")
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=8)
+        app["tv_tours"] = tv
+        
+        tv.heading("ma", text="Mã"); tv.heading("ten", text="Tên Tour Du Lịch")
+        tv.heading("ngay", text="Khởi hành"); tv.heading("gia", text="Giá vé")
+        tv.heading("khach", text="Chỗ trống"); tv.heading("tt", text="Trạng thái")
+        
+        tv.column("ma", width=60, anchor="center")
+        tv.column("ten", width=250, anchor="w")
+        tv.column("ngay", width=120, anchor="center")
+        tv.column("gia", width=120, anchor="center")
+        tv.column("khach", width=100, anchor="center")
+        tv.column("tt", width=120, anchor="center")
+        
+        for t in app["ql"].list_tours:
+            if t.get("trangThai") in ["Mở bán", "Đã chốt"]:
+                occupied = app["ql"].get_occupied_seats(t["ma"])
+                available = safe_int(t["khach"]) - occupied
+                tv.insert("", "end", values=(
+                    t["ma"], t["ten"], t["ngay"], 
+                    f"{safe_int(t['gia']):,}đ".replace(",", "."),
+                    f"{available} chỗ", t["trangThai"]
+                ))
+            
+        apply_zebra(tv)
+        tv.pack(fill="x")
 
-        var_pt = tk.StringVar(value="Tất cả")
-        for opt in ["Tất cả", "Máy bay", "Ô tô", "Tàu hỏa", "Du thuyền"]:
-            tk.Radiobutton(filter_fr, text=opt, variable=var_pt, value=opt, font=FONT_TNR, bg=COLOR_CARD, 
-                           command=lambda: loc_tour(var_pt.get(), tree)).pack(side="left", padx=15, pady=5)
+        # Khung chi tiết & Đăng ký
+        detail_fr = tk.LabelFrame(content_area, text="Chi tiết tour & Đăng ký", font=("Times New Roman", 14, "bold"), 
+                                  bg=THEME["surface"], bd=1, relief="solid", padx=15, pady=15)
+        detail_fr.pack(fill="both", expand=True, pady=15)
+        
+        lbl_detail = tk.Label(detail_fr, textvariable=app["detail_var"], justify="left", 
+                              font=("Times New Roman", 13), bg=THEME["surface"], anchor="w")
+        lbl_detail.pack(side="left", fill="both", expand=True)
 
-        # 2. Bảng Tour
-        table_fr = tk.Frame(content_area, bg=COLOR_CARD)
-        table_fr.pack(fill="both", expand=True, padx=20)
-        
-        cols = ("id", "place", "time", "trans", "rate")
-        tree = ttk.Treeview(table_fr, columns=cols, show="headings", height=8)
-        for col, txt in [("id", "Mã"), ("place", "Địa điểm"), ("time", "Thời gian"), ("trans", "Phương tiện"), ("rate", "Đánh giá")]:
-            tree.heading(col, text=txt); tree.column(col, anchor="center", width=120)
-        tree.column("place", width=300, anchor="w")
-        tree.pack(fill="both", expand=True)
-        
-        # 3. Khung Đăng ký & Chi tiết
-        reg_fr = tk.LabelFrame(content_area, text="Đăng ký & Thông tin HDV ", font=FONT_BOLD, bg="#f0f9ff")
-        reg_fr.pack(fill="x", padx=20, pady=15)
-        
-        lbl_info = tk.Label(reg_fr, text="Chọn tour để xem HDV và số khách...", font=FONT_TNR, bg="#f0f9ff", fg="#1e40af")
-        lbl_info.pack(side="left", padx=20, pady=10)
+        # Khung chọn số người & Nút đăng ký
+        action_fr = tk.Frame(detail_fr, bg=THEME["surface"])
+        action_fr.pack(side="right", padx=10)
 
-        def update_info(e):
-            sel = tree.focus()
+        tk.Label(action_fr, text="Số người đi:", font=("Times New Roman", 12, "bold"), 
+                 bg=THEME["surface"]).pack(pady=(0, 5))
+        
+        spn_people = tk.Spinbox(action_fr, from_=1, to=50, width=10, font=("Times New Roman", 12), 
+                                relief="solid", bd=1, justify="center")
+        spn_people.pack(pady=(0, 15))
+
+        def on_select(event):
+            sel = tv.selection()
             if not sel: return
-            val = tree.item(sel, "values")
-            tour = next(t for t in ds_tour_goc if t[0] == val[0])
-            lbl_info.config(text=f"{tour[1]} | HDV: {tour[4]} | {tour[5]}\n Hiện có {tour[6]} khách đã đăng ký")
+            ma = tv.item(sel[0])["values"][0]
+            t = app["ql"].find_tour(ma)
+            hdv = app["ql"].find_hdv(t.get("hdvPhuTrach"))
+            
+            # Cập nhật giới hạn cho Spinbox dựa trên chỗ trống thực tế
+            occupied = app["ql"].get_occupied_seats(ma)
+            available = safe_int(t["khach"]) - occupied
+            spn_people.config(to=max(1, available))
+            
+            info = [
+                f"TOUR: {t['ten']} ({t['ma']})",
+                f"Lộ trình: {t['diemDi']} → {t['diemDen']}",
+                f"Khởi hành: {t['ngay']} | Giá: {safe_int(t['gia']):,}đ".replace(",", "."),
+                f"Hướng dẫn viên: {hdv['tenHDV'] if hdv else 'Chưa phân công'} - SĐT: {hdv['sdt'] if hdv else 'N/A'}",
+                f"Trạng thái: {t['trangThai']} | Còn trống: {available} chỗ"
+            ]
+            app["detail_var"].set("\n".join(info))
 
-        tree.bind("<<TreeviewSelect>>", update_info)
+        tv.bind("<<TreeviewSelect>>", on_select)
 
-        def thuc_hien_dk():
-            sel = tree.focus()
-            if not sel: return messagebox.showwarning("Lỗi", "Vui lòng chọn tour!")
-            tour = next(t for t in ds_tour_goc if t[0] == tree.item(sel, "values")[0])
-            tour[6] += 1
-            ds_da_dat.append(tour)
-            messagebox.showinfo("Thành công", f"Đã đăng ký tour {tour[1]}!")
-            update_info(None)
+        def dang_ky_tour():
+            sel = tv.selection()
+            if not sel: return messagebox.showwarning("Chú ý", "Vui lòng chọn một tour để đăng ký!")
+            
+            num_people = safe_int(spn_people.get())
+            if num_people <= 0:
+                return messagebox.showwarning("Lỗi", "Số người đi không hợp lệ!")
 
-        tk.Button(reg_fr, text="ĐĂNG KÝ NGAY", bg=COLOR_SUCCESS, fg="white", font=FONT_BOLD, 
-                  padx=20, command=thuc_hien_dk).pack(side="right", padx=20)
+            ma = tv.item(sel[0])["values"][0]
+            t = app["ql"].find_tour(ma)
+            
+            # Kiểm tra chỗ trống
+            occupied = app["ql"].get_occupied_seats(ma)
+            available = safe_int(t["khach"]) - occupied
+            
+            if num_people > available:
+                return messagebox.showerror("Hết chỗ", f"Rất tiếc, tour này chỉ còn {available} chỗ trống!")
+
+            # Tạo mã booking mới
+            new_id = f"BK{len(app['ql'].list_bookings) + 1:02d}"
+            
+            # Tìm thông tin khách hàng từ JSON để lấy SĐT
+            user_info = app["ql"].find_user(user_data.get("username", ""))
+            sdt_khach = user_info.get("sdt", "Chưa cập nhật") if user_info else "Chưa cập nhật"
+
+            new_booking = {
+                "maBooking": new_id,
+                "maTour": ma,
+                "tenKhach": user_data["name"],
+                "sdt": sdt_khach,
+                "soNguoi": str(num_people),
+                "trangThai": "Đã cọc"
+            }
+            
+            app["ql"].list_bookings.append(new_booking)
+            app["ql"].save()
+            messagebox.showinfo("Thành công", f"Bạn đã đăng ký tour {t['ten']} cho {num_people} người thành công!\nMã đặt chỗ: {new_id}")
+            tab_danh_sach_tour()
+
+        style_button(action_fr, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x")
+
+    # --- TAB: TOUR ĐÃ ĐẶT ---
+    def tab_tour_da_dat():
+        clear_container()
+        tk.Label(content_area, text="LỊCH SỬ ĐẶT TOUR CỦA BẠN", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
         
-        loc_tour("Tất cả", tree)
-
-    def loc_tour(mode, tree):
-        for row in tree.get_children(): tree.delete(row)
-        for t in ds_tour_goc:
-            if mode == "Tất cả" or t[3] == mode:
-                tree.insert("", "end", values=(t[0], t[1], t[2], t[3], t[7]))
-
-    # --- TAB 2: TOUR ĐÃ ĐĂNG KÝ ---
-    def show_tour_da_dat():
-        xoa_khung_cu()
-        tk.Label(content_area, text="DANH SÁCH TOUR BẠN ĐÃ ĐẶT", font=FONT_BOLD, bg=COLOR_BG).pack(pady=20)
-        if not ds_da_dat:
-            tk.Label(content_area, text="Bạn chưa đăng ký tour nào.", font=FONT_TNR, bg=COLOR_BG).pack()
+        my_bookings = [b for b in app["ql"].list_bookings if b.get("tenKhach") == user_data["name"]]
+        
+        if not my_bookings:
+            tk.Label(content_area, text="Bạn chưa tham gia tour nào.", font=("Times New Roman", 13), bg=THEME["bg"], fg=THEME["muted"]).pack(pady=50)
             return
+
+        for b in my_bookings:
+            t = app["ql"].find_tour(b["maTour"])
+            if not t: continue
+            
+            card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=15, pady=10)
+            card.pack(fill="x", pady=5)
+            
+            tk.Label(card, text=f"✅ {t['ten']}", font=("Times New Roman", 14, "bold"), bg=THEME["surface"], fg=THEME["primary"]).pack(side="left")
+            tk.Label(card, text=f"Mã: {b['maBooking']} | Ngày: {t['ngay']} | Số người: {b['soNguoi']} | Trạng thái: {b['trangThai']}", 
+                     font=("Times New Roman", 12), bg=THEME["surface"]).pack(side="left", padx=20)
+            
+            style_button(card, "Hủy", THEME["danger"], lambda m=b["maBooking"]: huy_tour(m)).pack(side="right")
+
+    def huy_tour(ma_booking):
+        if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn hủy đặt chỗ {ma_booking}?"):
+            app["ql"].data["bookings"] = [b for b in app["ql"].list_bookings if b["maBooking"] != ma_booking]
+            app["ql"].save()
+            tab_tour_da_dat()
+
+    # --- TAB: GỬI ĐÁNH GIÁ ---
+    def tab_gui_danh_gia():
+        clear_container()
+        tk.Label(content_area, text="GỬI Ý KIẾN PHẢN HỒI", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
         
-        for tour in ds_da_dat:
-            item = tk.Frame(content_area, bg=COLOR_CARD, pady=10, padx=20, relief="groove", bd=1)
-            item.pack(fill="x", padx=40, pady=5)
-            tk.Label(item, text=f"✅ {tour[1]} - HDV: {tour[4]} ({tour[5]})", font=FONT_TNR, bg=COLOR_CARD).pack(side="left")
+        card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
+        card.pack(fill="both", expand=True)
+        
+        tk.Label(card, text="Chúng tôi luôn lắng nghe ý kiến của bạn để cải thiện dịch vụ tốt hơn:", 
+                 font=("Times New Roman", 13), bg=THEME["surface"]).pack(anchor="w", pady=(0, 10))
+        
+        txt = tk.Text(card, height=10, font=("Times New Roman", 13), relief="solid", bd=1)
+        txt.pack(fill="both", expand=True, pady=(0, 20))
+        
+        style_button(card, "GỬI NHẬN XÉT", THEME["primary"], 
+                     lambda: (messagebox.showinfo("Cảm ơn", "Cảm ơn bạn đã gửi phản hồi cho chúng tôi!"), tab_danh_sach_tour())).pack()
 
-    # --- TAB 3: GỬI ĐÁNH GIÁ ---
-    def show_feedback():
-        xoa_khung_cu()
-        tk.Label(content_area, text="GỬI ĐÁNH GIÁ CHO ADMIN & HDV", font=FONT_BOLD, bg=COLOR_BG).pack(pady=20)
-        txt = tk.Text(content_area, height=10, font=FONT_TNR)
-        txt.pack(padx=40, fill="x", pady=10)
-        tk.Button(content_area, text="GỬI NHẬN XÉT", font=FONT_BOLD, bg=COLOR_PRIMARY, fg="white", 
-                  padx=30, pady=10, command=lambda: messagebox.showinfo("Cảm ơn", "Đã gửi đánh giá!")).pack()
+    # --- TAB: HỒ SƠ CÁ NHÂN ---
+    def tab_ho_so():
+        clear_container()
+        tk.Label(content_area, text="THÔNG TIN HỒ SƠ CÁ NHÂN", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
+        
+        card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=30, pady=30)
+        card.pack(pady=10)
 
-    # --- SIDEBAR BUTTONS ---
-    btn_style = {"bg": COLOR_SIDEBAR, "fg": "white", "font": FONT_TNR, "bd": 0, "anchor": "w", "padx": 25, "pady": 15, "cursor": "hand2"}
+        # Tìm dữ liệu khách hàng hiện tại (dựa trên username từ ChayUD)
+        username = user_data.get("username", "")
+        if not username: # Fallback nếu đăng nhập kiểu cũ
+             username = user_data.get("name", "")
+             
+        user_info = app["ql"].find_user(username)
+        
+        if not user_info:
+            tk.Label(card, text="Lỗi: Không tìm thấy thông tin tài khoản!", fg=THEME["danger"], bg=THEME["surface"]).pack()
+            return
+
+        fields = [("Họ và tên", "fullname"), ("Số điện thoại", "sdt"), ("Mật khẩu mới", "password")]
+        widgets = {}
+
+        for label, key in fields:
+            row = tk.Frame(card, bg=THEME["surface"])
+            row.pack(fill="x", pady=8)
+            tk.Label(row, text=label, width=15, anchor="w", bg=THEME["surface"], font=("Times New Roman", 12, "bold")).pack(side="left")
+            e = tk.Entry(row, font=("Times New Roman", 12), relief="solid", bd=1, width=30)
+            e.pack(side="left", ipady=3)
+            e.insert(0, user_info.get(key, ""))
+            widgets[key] = e
+
+        def save_profile():
+            for key, entry in widgets.items():
+                user_info[key] = entry.get().strip()
+            
+            app["ql"].save()
+            # Cập nhật lại tên hiển thị trên Sidebar ngay lập tức
+            user_data["name"] = user_info["fullname"]
+            messagebox.showinfo("Thành công", "Đã cập nhật thông tin cá nhân thành công!")
+            tab_ho_so()
+
+        style_button(card, "LƯU THÔNG TIN", THEME["success"], save_profile).pack(pady=20)
+
+    # --- ĐĂNG KÝ NÚT MENU ---
+    menu_btn("Khám phá Tour", tab_danh_sach_tour)
+    menu_btn("Tour đã đặt", tab_tour_da_dat)
+    menu_btn("Gửi đánh giá", tab_gui_danh_gia)
+    menu_btn("Hồ sơ cá nhân", tab_ho_so)
     
-    tk.Button(sidebar, text="Danh sách Tour", **btn_style, command=show_danh_sach).pack(fill="x")
-    tk.Button(sidebar, text="Tour đã đăng ký", **btn_style, command=show_tour_da_dat).pack(fill="x")
-    tk.Button(sidebar, text="Gửi đánh giá", **btn_style, command=show_feedback).pack(fill="x")
+    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=20)
+    
+    style_button(sidebar, "ĐĂNG XUẤT", THEME["danger"], lambda: logout_user(root)).pack(fill="x", side="bottom", padx=10, pady=20)
 
-    tk.Button(sidebar, text="ĐĂNG XUẤT", bg="#ef4444", fg="white", font=FONT_BOLD, 
-              bd=0, pady=15, command=root.destroy).pack(side="bottom", fill="x", pady=20)
+    tab_danh_sach_tour() # Mở mặc định
 
-    # Mặc định mở tab đầu tiên
-    show_danh_sach()
+def logout_user(root):
+    if messagebox.askyesno("Xác nhận", "Bạn có muốn đăng xuất?"):
+        from ChayUD import TravelSystem
+        for widget in root.winfo_children():
+            widget.destroy()
+        TravelSystem(root)
 
 if __name__ == "__main__":
     win = tk.Tk()
     win.title("Vietnam Travel 2026")
     win.geometry("1400x850")
-    khoi_tao_khach(win, {"name": "NHUNG"})
+    khoi_tao_khach(win, {"name": "NHUNG", "id": "KH01"})
     win.mainloop()
