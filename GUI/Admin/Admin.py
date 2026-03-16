@@ -1500,7 +1500,7 @@ def logout(app):
         for widget in app["root"].winfo_children():
             widget.destroy()
         try:
-            from GUI.login.login import show_role_selection
+            from GUI.Login.login import show_role_selection
             app["root"].configure(bg=THEME["bg"])
             show_role_selection()
         except Exception as e:
