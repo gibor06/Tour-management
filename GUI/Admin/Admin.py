@@ -6,6 +6,8 @@ from tkinter import messagebox, ttk
 from datetime import datetime
 import copy
 
+from core.security import mask_password, prepare_password_for_storage
+
 # =========================
 # THEME
 # =========================
@@ -233,6 +235,14 @@ class DataStore:
             del clean_data["reviews"]
         if "notifications" in clean_data:
             del clean_data["notifications"]
+
+        for hdv in clean_data.get("hdv", []):
+            hdv["password"] = prepare_password_for_storage(hdv.get("password", ""))
+        for user in clean_data.get("users", []):
+            user["password"] = prepare_password_for_storage(user.get("password", ""))
+        admin = clean_data.get("admin", {})
+        if isinstance(admin, dict):
+            admin["password"] = prepare_password_for_storage(admin.get("password", ""))
 
         with open(self.path, "w", encoding="utf-8") as f:
             json.dump(clean_data, f, ensure_ascii=False, indent=2)
@@ -465,7 +475,9 @@ def dashboard_tab(app):
 # HDV MANAGEMENT
 # =========================
 def validate_hdv(app, form_data, old_ma=None):
-    required = ["maHDV", "tenHDV", "sdt", "email", "kn", "gioiTinh", "khuVuc", "trangThai", "password"]
+    required = ["maHDV", "tenHDV", "sdt", "email", "kn", "gioiTinh", "khuVuc", "trangThai"]
+    if old_ma is None:
+        required.append("password")
 
     if not all(form_data.get(k, "").strip() for k in required):
         return False, "Vui lòng nhập đầy đủ thông tin HDV."
@@ -475,7 +487,7 @@ def validate_hdv(app, form_data, old_ma=None):
 
     if len(form_data["tenHDV"].strip()) < 3:
         return False, "Tên HDV quá ngắn."
-    if len(form_data["password"].strip()) < 3:
+    if form_data.get("password") and len(form_data["password"].strip()) < 3:
         return False, "Mật khẩu quá ngắn."
 
     if not is_valid_phone(form_data["sdt"]):
@@ -534,10 +546,11 @@ def open_hdv_form(app, data=None):
     scroll_outer, form = create_scrollable_form(card, THEME["surface"])
     scroll_outer.pack(fill="both", expand=True, padx=20, pady=(0, 10))
 
+    password_label = "Mật khẩu mới" if data else "Mật khẩu"
     fields = [
         ("Mã HDV", "maHDV", "entry"),
         ("Tên HDV", "tenHDV", "entry"),
-        ("Mật khẩu", "password", "entry"),
+        (password_label, "password", "entry"),
         ("Số điện thoại", "sdt", "entry"),
         ("Email", "email", "entry"),
         ("Kinh nghiệm (năm)", "kn", "entry"),
@@ -553,7 +566,7 @@ def open_hdv_form(app, data=None):
         tk.Label(row, text=label, width=16, anchor="w", bg=THEME["surface"], font=("Times New Roman", 13, "bold")).pack(side="left")
 
         if kind == "entry":
-            w = tk.Entry(row, font=("Times New Roman", 13), relief="solid", bd=1)
+            w = tk.Entry(row, font=("Times New Roman", 13), relief="solid", bd=1, show="*" if key == "password" else "")
             w.pack(side="left", fill="x", expand=True, ipady=5)
         else:
             w = ttk.Combobox(row, font=("Times New Roman", 12), values=extra[0], state="readonly")
@@ -561,9 +574,9 @@ def open_hdv_form(app, data=None):
 
         widgets[key] = w
         if data:
-            if kind == "entry":
+            if kind == "entry" and key != "password":
                 widgets[key].insert(0, data.get(key, ""))
-            else:
+            elif kind != "entry":
                 widgets[key].set(data.get(key, ""))
 
     if data:
@@ -577,10 +590,19 @@ def open_hdv_form(app, data=None):
             else:
                 new_data[key] = widgets[key].get().strip()
 
+        raw_password = new_data.get("password", "")
+        if data and not raw_password:
+            new_data["password"] = data.get("password", "")
+
         ok, msg = validate_hdv(app, new_data, data["maHDV"] if data else None)
         if not ok:
             messagebox.showwarning("Thông báo", msg, parent=top)
             return
+
+        if data and raw_password:
+            new_data["password"] = prepare_password_for_storage(raw_password)
+        if not data:
+            new_data["password"] = prepare_password_for_storage(raw_password)
 
         if data:
             for field in ["total_reviews", "avg_rating", "skill_score", "attitude_score", "problem_solving_score"]:
@@ -703,7 +725,11 @@ def refresh_users(app, keyword=""):
         rows = [u for u in rows if kw in u["username"].lower() or kw in u["fullname"].lower()]
 
     for u in rows:
-        tree.insert("", "end", values=(u["username"], u["fullname"], u.get("sdt", ""), u.get("password", "")))
+        tree.insert(
+            "",
+            "end",
+            values=(u["username"], u["fullname"], u.get("sdt", ""), mask_password(u.get("password", ""))),
+        )
     apply_zebra(tree)
 
 
@@ -764,7 +790,7 @@ def open_user_form(app, data=None):
                     if password:
                         if len(password) < 3:
                             return messagebox.showwarning("Lỗi", "Mật khẩu phải có ít nhất 3 ký tự.", parent=top)
-                        app["ql"].list_users[i]["password"] = password
+                        app["ql"].list_users[i]["password"] = prepare_password_for_storage(password)
                     break
         else:
             if not password or len(password) < 3:
@@ -776,7 +802,7 @@ def open_user_form(app, data=None):
 
             app["ql"].list_users.append({
                 "username": username,
-                "password": password,
+                "password": prepare_password_for_storage(password),
                 "fullname": fullname,
                 "sdt": sdt
             })
@@ -1500,7 +1526,8 @@ def logout(app):
         for widget in app["root"].winfo_children():
             widget.destroy()
         try:
-            from GUI.Login.login import show_role_selection
+            from GUI.Login.login import set_root, show_role_selection
+            set_root(app["root"])
             app["root"].configure(bg=THEME["bg"])
             show_role_selection()
         except Exception as e:

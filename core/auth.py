@@ -73,7 +73,7 @@ class AuthService:
         result = ServiceResult(
             True,
             f"Chào mừng {self._display_name(role, record, normalized_username)}!",
-            username=normalized_username,
+            username=self._account_username(role, record, normalized_username),
             display_name=self._display_name(role, record, normalized_username),
             role=role,
         )
@@ -119,7 +119,11 @@ class AuthService:
             return ServiceResult(False, "Số điện thoại phải có 10 số và bắt đầu bằng 0.", level="warning")
 
         self.datastore.load()
-        if self.datastore.find_user(normalized_username):
+        users = getattr(self.datastore, "list_users", self.datastore.data.get("users", []))
+        if self.datastore.find_user(normalized_username) or any(
+            str(user.get("username", "")).lower() == normalized_username.lower()
+            for user in users
+        ):
             write_activity_log(
                 action="REGISTER_USER",
                 actor=normalized_username,
@@ -159,12 +163,36 @@ class AuthService:
     def _resolve_account(self, role: str, username: str):
         if role == "admin":
             admin = self.datastore.data.get("admin", {})
-            return admin if username == admin.get("username") else None
+            return admin if str(username).lower() == str(admin.get("username", "")).lower() else None
         if role == "guide":
-            return self.datastore.find_hdv(username)
+            account = self.datastore.find_hdv(username)
+            if account:
+                return account
+            username_upper = str(username).upper()
+            return next(
+                (h for h in self.datastore.list_hdv if str(h.get("maHDV", "")).upper() == username_upper),
+                None,
+            )
         if role == "user":
-            return self.datastore.find_user(username)
+            account = self.datastore.find_user(username)
+            if account:
+                return account
+            username_lower = str(username).lower()
+            return next(
+                (u for u in self.datastore.list_users if str(u.get("username", "")).lower() == username_lower),
+                None,
+            )
         return None
+
+    @staticmethod
+    def _account_username(role: str, record: dict, fallback: str) -> str:
+        if role == "guide":
+            return record.get("maHDV", fallback)
+        if role == "user":
+            return record.get("username", fallback)
+        if role == "admin":
+            return record.get("username", fallback)
+        return fallback
 
     @staticmethod
     def _display_name(role: str, record: dict, fallback: str) -> str:
