@@ -7,6 +7,7 @@ from datetime import datetime
 import copy
 
 from core.security import mask_password, prepare_password_for_storage
+from core.system_rules import apply_system_rules
 
 # =========================
 # THEME
@@ -207,6 +208,8 @@ class DataStore:
             b.setdefault("usernameDat", "")
             b.setdefault("danhSachKhach", [])
 
+        self.data = apply_system_rules(self.data)
+
         if os.path.exists(self.rev_path):
             try:
                 with open(self.rev_path, "r", encoding="utf-8") as f:
@@ -230,6 +233,7 @@ class DataStore:
         if folder and not os.path.exists(folder):
             os.makedirs(folder, exist_ok=True)
 
+        self.data = apply_system_rules(self.data)
         clean_data = copy.deepcopy(self.data)
         if "reviews" in clean_data:
             del clean_data["reviews"]
@@ -1222,7 +1226,7 @@ def validate_booking(app, form_data, old_ma=None):
         if occupied - old_people + int(form_data["soNguoi"]) > int(tour["khach"]):
             return False, f"Tour này không đủ chỗ cho {form_data['soNguoi']} người."
 
-    if tour["trangThai"] in ["Hoàn tất", "Tạm hoãn", "Đã hủy"]:
+    if tour["trangThai"] in ["Hoàn tất", "Tạm hoãn", "Đã hủy"] and form_data["trangThai"] not in ["Đã hủy", "Chờ hoàn tiền", "Hoàn tiền"]:
         return False, f"Không thể đặt chỗ cho tour đang ở trạng thái '{tour['trangThai']}'."
 
     return True, ""
@@ -1277,7 +1281,7 @@ def open_booking_form(app, data=None):
         ("Tiền cọc", "tienCoc", "entry"),
         ("Đã thanh toán", "daThanhToan", "entry"),
         ("Còn nợ", "conNo", "entry"),
-        ("Hình thức thanh toán", "hinhThucThanhToan", "combo", ["Tiền mặt", "Chuyển khoản", "Thẻ"]),
+        ("Hình thức thanh toán", "hinhThucThanhToan", "combo", ["Tiền mặt", "Chuyển khoản", "Thẻ", "Momo", "ZaloPay", "VNPay"]),
         ("Nguồn khách", "nguonKhach", "combo", ["Khách lẻ", "Facebook", "Zalo", "Website", "Đại lý"]),
         ("Username đặt", "usernameDat", "entry"),
         ("Ghi chú", "ghiChu", "entry"),
@@ -1305,6 +1309,16 @@ def open_booking_form(app, data=None):
             else:
                 w.set(val)
 
+    tk.Label(
+        form,
+        text="Hệ thống sẽ tự tính lại tổng tiền, công nợ và trạng thái theo dữ liệu tour + thanh toán.",
+        bg=THEME["surface"],
+        fg=THEME["muted"],
+        font=("Times New Roman", 11, "italic"),
+        wraplength=520,
+        justify="left",
+    ).pack(anchor="w", pady=(6, 0))
+
     if data:
         widgets["maBooking"].config(state="disabled")
 
@@ -1316,13 +1330,18 @@ def open_booking_form(app, data=None):
             else:
                 form_data[key] = widgets[key].get().strip()
 
-        for key in ["tongTien", "tienCoc", "daThanhToan", "conNo"]:
-            if not form_data[key]:
-                form_data[key] = "0"
+        if not form_data.get("trangThai"):
+            form_data["trangThai"] = "Mới tạo"
 
-        if not form_data["tongTien"].isdigit() or not form_data["tienCoc"].isdigit() or not form_data["daThanhToan"].isdigit() or not form_data["conNo"].isdigit():
-            messagebox.showwarning("Thông báo", "Tiền phải là số nguyên không âm.", parent=top)
+        if safe_int(form_data.get("soNguoi", 0)) <= 0:
+            messagebox.showwarning("Thông báo", "Số người đi phải là số nguyên dương.", parent=top)
             return
+
+        form_data["soNguoi"] = str(max(1, safe_int(form_data["soNguoi"])))
+
+        # Tự động chuẩn hóa dữ liệu tiền theo ràng buộc hệ thống.
+        for key in ["tongTien", "tienCoc", "daThanhToan", "conNo"]:
+            form_data[key] = str(max(0, safe_int(form_data.get(key, 0))))
 
         form_data["ngayDat"] = data.get("ngayDat", datetime.now().strftime("%d/%m/%Y")) if data else datetime.now().strftime("%d/%m/%Y")
         form_data["danhSachKhach"] = data.get("danhSachKhach", []) if data else []
@@ -1602,7 +1621,8 @@ def main(root=None):
     menu_btn("Đánh giá & Thông báo", lambda: admin_feedback_tab(app)).pack(fill="x", pady=4)
     menu_btn("Lưu dữ liệu JSON", lambda: manual_save(app)).pack(fill="x", pady=4)
 
-    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=16)
+    tk.Frame(sidebar, bg="#64748b", height=2).pack(fill="x", padx=16, pady=16)
+    
     menu_btn("Đăng xuất hệ thống", lambda: logout(app)).pack(fill="x", pady=4)
 
     right_panel = tk.Frame(root, bg=THEME["bg"])

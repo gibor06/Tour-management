@@ -222,18 +222,38 @@ class TravelSystem:
     def show_register_screen(self):
         self.clear_screen()
 
+        container = tk.Frame(self.main_frame, bg=THEME["bg"])
+        container.pack(fill="both", expand=True, padx=20, pady=20)
+
         card = tk.Frame(
-            self.main_frame,
+            container,
             bg=THEME["surface"],
             padx=40,
             pady=30,
             highlightbackground=THEME["border"],
             highlightthickness=1,
         )
-        card.place(relx=0.5, rely=0.5, anchor="center")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88)
+
+        def sync_register_card(event=None):
+            available_w = max(320, container.winfo_width())
+            target_w = min(560, max(320, available_w - 24))
+            card.place_configure(width=target_w)
+
+            # Khi chiều cao hẹp, đẩy card lên trên một chút để tránh cụm nút bị khuất.
+            if container.winfo_height() < 560:
+                card.place_configure(rely=0.45)
+            else:
+                card.place_configure(rely=0.5)
+
+        container.bind("<Configure>", sync_register_card)
+        sync_register_card()
+
+        form_inner = tk.Frame(card, bg=THEME["surface"])
+        form_inner.pack(fill="x", expand=True)
 
         tk.Label(
-            card,
+            form_inner,
             text="ĐĂNG KÝ",
             font=("Times New Roman", 20, "bold"),
             bg=THEME["surface"],
@@ -250,16 +270,16 @@ class TravelSystem:
         self.reg_widgets = {}
         for label_text, key in fields:
             tk.Label(
-                card,
+                form_inner,
                 text=label_text,
                 font=("Times New Roman", 11),
                 bg=THEME["surface"],
                 fg=THEME["text"],
             ).pack(anchor="w")
-            entry = tk.Entry(card, width=30, font=("Times New Roman", 12), bd=1, relief="solid")
+            entry = tk.Entry(form_inner, font=("Times New Roman", 12), bd=1, relief="solid")
             if key == "pass":
                 entry.config(show="*")
-            entry.pack(pady=(5, 10), ipady=5)
+            entry.pack(fill="x", pady=(5, 10), ipady=5)
             self.reg_widgets[key] = entry
 
         def perform_register():
@@ -279,20 +299,19 @@ class TravelSystem:
             notifier("Lỗi", result.message)
 
         tk.Button(
-            card,
+            form_inner,
             text="ĐĂNG KÝ NGAY",
             bg=THEME["success"],
             fg="white",
             font=("Times New Roman", 12, "bold"),
-            width=25,
             height=2,
             cursor="hand2",
             bd=0,
             command=perform_register,
-        ).pack(pady=20)
+        ).pack(fill="x", pady=20)
 
         tk.Button(
-            card,
+            form_inner,
             text="← Quay lại",
             font=("Times New Roman", 11),
             fg=THEME["muted"],

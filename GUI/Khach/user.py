@@ -7,6 +7,7 @@ from datetime import datetime
 import copy
 
 from core.security import prepare_password_for_storage
+from core.system_rules import apply_system_rules
 
 # =========================
 # VALIDATION
@@ -25,6 +26,16 @@ def safe_int(value):
         return int(value)
     except:
         return 0
+
+
+def booking_payment_status(total_amount, paid_amount):
+    total = max(0, safe_int(total_amount))
+    paid = max(0, safe_int(paid_amount))
+    if paid <= 0:
+        return "Mới tạo"
+    if total > 0 and paid < total:
+        return "Đã cọc"
+    return "Đã thanh toán"
 
 
 # =========================
@@ -50,6 +61,14 @@ THEME = {
 TOUR_BOOKABLE_STATUSES = ["Giữ chỗ", "Mở bán"]
 TOUR_LOCK_CANCEL_STATUSES = ["Đã chốt đoàn", "Chờ khởi hành", "Đang đi", "Hoàn tất"]
 BOOKING_CANCEL_STATUSES = ["Đã hủy", "Chờ hoàn tiền", "Hoàn tiền"]
+PAYMENT_METHODS = [
+    "Tiền mặt",
+    "Chuyển khoản",
+    "Thẻ",
+    "Momo",
+    "ZaloPay",
+    "VNPay",
+]
 
 # =========================
 # PATH DỮ LIỆU
@@ -147,6 +166,8 @@ class DataStore:
             b.setdefault("usernameDat", "")
             b.setdefault("danhSachKhach", [])
 
+        self.data = apply_system_rules(self.data)
+
         if os.path.exists(self.rev_path):
             try:
                 with open(self.rev_path, "r", encoding="utf-8") as f:
@@ -170,6 +191,7 @@ class DataStore:
         if folder and not os.path.exists(folder):
             os.makedirs(folder, exist_ok=True)
 
+        self.data = apply_system_rules(self.data)
         clean_data = copy.deepcopy(self.data)
         if "reviews" in clean_data:
             del clean_data["reviews"]
@@ -330,6 +352,11 @@ def khoi_tao_khach(root, user_data=None):
         username = user_data.get("username", "")
         return [b for b in app["ql"].list_bookings if b.get("usernameDat") == username]
 
+    def responsive_wraplength(base_offset=360, minimum=320):
+        # Tính wraplength theo chiều rộng thực tế để tránh text tràn khi cửa sổ nhỏ.
+        current_width = max(content_area.winfo_width(), right_panel.winfo_width(), root.winfo_width())
+        return max(minimum, current_width - base_offset)
+
     def tab_danh_sach_tour():
         clear_container()
 
@@ -370,21 +397,82 @@ def khoi_tao_khach(root, user_data=None):
                 ))
 
         apply_zebra(tv)
-        tv.pack(fill="x")
+        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
+        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+
+        sy.pack(side="right", fill="y")
+        sx.pack(side="bottom", fill="x")
+        tv.pack(side="left", fill="both", expand=True)
 
         detail_fr = tk.LabelFrame(content_area, text="Chi tiết tour & Đăng ký", font=("Times New Roman", 14, "bold"), bg=THEME["surface"], bd=1, relief="solid", padx=15, pady=15)
         detail_fr.pack(fill="both", expand=True, pady=15)
 
-        lbl_detail = tk.Label(detail_fr, textvariable=app["detail_var"], justify="left", font=("Times New Roman", 13), bg=THEME["surface"], anchor="w", wraplength=720)
+        lbl_detail = tk.Label(
+            detail_fr,
+            textvariable=app["detail_var"],
+            justify="left",
+            font=("Times New Roman", 13),
+            bg=THEME["surface"],
+            anchor="w",
+            wraplength=responsive_wraplength(),
+        )
         lbl_detail.pack(side="left", fill="both", expand=True)
 
         action_fr = tk.Frame(detail_fr, bg=THEME["surface"])
         action_fr.pack(side="right", padx=10)
 
+        def sync_detail_layout(event=None):
+            width = detail_fr.winfo_width()
+            if width < 760:
+                if str(action_fr.pack_info().get("side", "")) != "top":
+                    action_fr.pack_forget()
+                    action_fr.pack(side="top", fill="x", pady=(12, 0))
+                lbl_detail.config(wraplength=max(260, width - 40))
+                spn_people.config(width=8)
+                pay_method_cb.configure(width=14)
+                ent_pay_now.config(width=12)
+            else:
+                if str(action_fr.pack_info().get("side", "")) != "right":
+                    action_fr.pack_forget()
+                    action_fr.pack(side="right", padx=10)
+                action_w = max(220, action_fr.winfo_reqwidth())
+                lbl_detail.config(wraplength=max(320, width - action_w - 36))
+                spn_people.config(width=10)
+                pay_method_cb.configure(width=16)
+                ent_pay_now.config(width=14)
+
+        detail_fr.bind("<Configure>", sync_detail_layout)
+
         tk.Label(action_fr, text="Số người đi:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
 
         spn_people = tk.Spinbox(action_fr, from_=1, to=50, width=10, font=("Times New Roman", 12), relief="solid", bd=1, justify="center")
         spn_people.pack(pady=(0, 15))
+
+        tk.Label(action_fr, text="Hình thức TT:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
+        pay_method_var = tk.StringVar(value=PAYMENT_METHODS[0])
+        pay_method_cb = ttk.Combobox(
+            action_fr,
+            textvariable=pay_method_var,
+            values=PAYMENT_METHODS,
+            state="readonly",
+            width=16,
+            font=("Times New Roman", 11),
+        )
+        pay_method_cb.pack(pady=(0, 12))
+
+        tk.Label(action_fr, text="Thanh toán ngay:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
+        ent_pay_now = tk.Entry(action_fr, width=14, font=("Times New Roman", 12), relief="solid", bd=1, justify="center")
+        ent_pay_now.insert(0, "0")
+        ent_pay_now.pack(pady=(0, 6))
+
+        tk.Label(
+            action_fr,
+            text="Nhập 0 nếu chỉ giữ chỗ.",
+            font=("Times New Roman", 10, "italic"),
+            bg=THEME["surface"],
+            fg=THEME["muted"],
+        ).pack(pady=(0, 14))
 
         def on_select(event):
             sel = tv.selection()
@@ -449,6 +537,11 @@ def khoi_tao_khach(root, user_data=None):
             sdt_khach = user_info.get("sdt", "Chưa cập nhật") if user_info else user_data.get("sdt", "Chưa cập nhật")
 
             tong_tien = safe_int(t.get("gia", 0)) * num_people
+            pay_now = max(0, safe_int(ent_pay_now.get()))
+            if pay_now > tong_tien:
+                return messagebox.showwarning("Lỗi", "Số tiền thanh toán ngay không được lớn hơn tổng tiền.")
+
+            payment_method = pay_method_var.get().strip() or PAYMENT_METHODS[0]
 
             new_booking = {
                 "maBooking": new_id,
@@ -456,13 +549,13 @@ def khoi_tao_khach(root, user_data=None):
                 "tenKhach": fullname,
                 "sdt": sdt_khach,
                 "soNguoi": str(num_people),
-                "trangThai": "Mới tạo",
+                "trangThai": booking_payment_status(tong_tien, pay_now),
                 "ngayDat": datetime.now().strftime("%d/%m/%Y"),
                 "tongTien": tong_tien,
-                "tienCoc": 0,
-                "daThanhToan": 0,
-                "conNo": tong_tien,
-                "hinhThucThanhToan": "Tiền mặt",
+                "tienCoc": pay_now,
+                "daThanhToan": pay_now,
+                "conNo": max(tong_tien - pay_now, 0),
+                "hinhThucThanhToan": payment_method,
                 "nguonKhach": "Khách lẻ",
                 "ghiChu": "",
                 "usernameDat": user_data.get("username", ""),
@@ -472,10 +565,19 @@ def khoi_tao_khach(root, user_data=None):
             app["ql"].list_bookings.append(new_booking)
             app["ql"].save()
 
-            messagebox.showinfo("Thành công", f"Bạn đã đăng ký tour {t['ten']} cho {num_people} người thành công!\nMã đặt chỗ: {new_id}")
+            messagebox.showinfo(
+                "Thành công",
+                (
+                    f"Bạn đã đăng ký tour {t['ten']} cho {num_people} người thành công!\n"
+                    f"Mã đặt chỗ: {new_id}\n"
+                    f"Hình thức thanh toán: {payment_method}\n"
+                    f"Đã thanh toán: {pay_now:,}đ".replace(",", ".")
+                ),
+            )
             tab_danh_sach_tour()
 
         style_button(action_fr, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x")
+        sync_detail_layout()
 
     def tab_tour_da_dat():
         clear_container()
@@ -505,15 +607,107 @@ def khoi_tao_khach(root, user_data=None):
                 left,
                 text=(
                     f"Mã: {b['maBooking']} | Ngày: {t['ngay']} | Số người: {b['soNguoi']} | "
-                    f"Trạng thái: {b['trangThai']} | Đã thanh toán: {safe_int(b.get('daThanhToan', 0)):,}đ".replace(",", ".")
+                    f"Trạng thái: {b['trangThai']} | Hình thức TT: {b.get('hinhThucThanhToan', 'Tiền mặt')} | "
+                    f"Đã thanh toán: {safe_int(b.get('daThanhToan', 0)):,}đ | Còn nợ: {safe_int(b.get('conNo', 0)):,}đ".replace(",", ".")
                 ),
                 font=("Times New Roman", 12),
                 bg=THEME["surface"],
-                wraplength=760,
+                wraplength=responsive_wraplength(base_offset=420, minimum=300),
                 justify="left"
-            ).pack(anchor="w", pady=(4, 0))
+            )
+            booking_label = left.winfo_children()[-1]
+            booking_label.pack(anchor="w", pady=(4, 0))
 
+            def sync_booking_wrap(event, label=booking_label):
+                label.config(wraplength=max(300, event.width - 230))
+
+            card.bind("<Configure>", sync_booking_wrap)
+
+            style_button(card, "Thanh toán", THEME["primary"], lambda m=b["maBooking"]: cap_nhat_thanh_toan(m)).pack(side="right", padx=(0, 8))
             style_button(card, "Hủy", THEME["danger"], lambda m=b["maBooking"]: huy_tour(m)).pack(side="right")
+
+    def cap_nhat_thanh_toan(ma_booking):
+        booking = next((b for b in app["ql"].list_bookings if b["maBooking"] == ma_booking), None)
+        if not booking:
+            return
+
+        if booking.get("trangThai") in BOOKING_CANCEL_STATUSES:
+            return messagebox.showwarning("Không thể thanh toán", "Booking này đang ở trạng thái hủy/hoàn tiền.")
+
+        tong_tien = safe_int(booking.get("tongTien", 0))
+        da_thanh_toan = safe_int(booking.get("daThanhToan", 0))
+        con_no = max(tong_tien - da_thanh_toan, 0)
+
+        if con_no <= 0:
+            return messagebox.showinfo("Đã hoàn tất", "Booking này đã thanh toán đủ.")
+
+        top = tk.Toplevel(root)
+        top.title(f"Thanh toán booking {ma_booking}")
+        top.geometry("420x330")
+        top.configure(bg=THEME["bg"])
+        top.transient(root)
+        top.grab_set()
+
+        card = tk.Frame(top, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
+        card.pack(fill="both", expand=True, padx=16, pady=16)
+
+        tk.Label(card, text=f"Booking: {ma_booking}", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 14, "bold")).pack(anchor="w", pady=(0, 8))
+        tk.Label(
+            card,
+            text=(
+                f"Tổng tiền: {tong_tien:,}đ\n"
+                f"Đã thanh toán: {da_thanh_toan:,}đ\n"
+                f"Còn nợ: {con_no:,}đ"
+            ).replace(",", "."),
+            bg=THEME["surface"],
+            fg=THEME["text"],
+            justify="left",
+            font=("Times New Roman", 12),
+        ).pack(anchor="w", pady=(0, 12))
+
+        tk.Label(card, text="Hình thức thanh toán:", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 12, "bold")).pack(anchor="w")
+        current_method = booking.get("hinhThucThanhToan", PAYMENT_METHODS[0])
+        if current_method not in PAYMENT_METHODS:
+            current_method = PAYMENT_METHODS[0]
+        method_var = tk.StringVar(value=current_method)
+        ttk.Combobox(
+            card,
+            textvariable=method_var,
+            values=PAYMENT_METHODS,
+            state="readonly",
+            font=("Times New Roman", 11),
+            width=28,
+        ).pack(anchor="w", pady=(4, 12))
+
+        tk.Label(card, text="Số tiền thanh toán thêm:", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 12, "bold")).pack(anchor="w")
+        amount_entry = tk.Entry(card, font=("Times New Roman", 12), relief="solid", bd=1)
+        amount_entry.insert(0, str(con_no))
+        amount_entry.pack(anchor="w", pady=(4, 10), fill="x")
+
+        def submit_payment():
+            pay_more = safe_int(amount_entry.get())
+            if pay_more <= 0:
+                return messagebox.showwarning("Lỗi", "Số tiền thanh toán thêm phải lớn hơn 0.", parent=top)
+            if pay_more > con_no:
+                return messagebox.showwarning("Lỗi", "Số tiền thanh toán thêm không được vượt quá công nợ.", parent=top)
+
+            new_paid = da_thanh_toan + pay_more
+            booking["daThanhToan"] = new_paid
+            if safe_int(booking.get("tienCoc", 0)) <= 0:
+                booking["tienCoc"] = pay_more
+            booking["conNo"] = max(tong_tien - new_paid, 0)
+            booking["hinhThucThanhToan"] = method_var.get().strip() or PAYMENT_METHODS[0]
+            booking["trangThai"] = booking_payment_status(tong_tien, new_paid)
+
+            app["ql"].save()
+            top.destroy()
+            messagebox.showinfo("Thành công", f"Đã cập nhật thanh toán cho booking {ma_booking}.")
+            tab_tour_da_dat()
+
+        btns = tk.Frame(card, bg=THEME["surface"])
+        btns.pack(fill="x", pady=(8, 0))
+        style_button(btns, "Xác nhận", THEME["success"], submit_payment).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        style_button(btns, "Đóng", THEME["muted"], top.destroy).pack(side="left", fill="x", expand=True)
 
     def huy_tour(ma_booking):
         booking = next((b for b in app["ql"].list_bookings if b["maBooking"] == ma_booking), None)
@@ -759,8 +953,20 @@ def khoi_tao_khach(root, user_data=None):
 
             tk.Label(card, text=f"HDV: {n.get('tenHDV', 'N/A')}", font=("Times New Roman", 12, "italic"), bg=THEME["surface"], fg=THEME["primary"]).pack(anchor="w", pady=(5, 10))
 
-            msg = tk.Label(card, text=n.get("content", ""), font=("Times New Roman", 13), bg=THEME["surface"], justify="left", wraplength=800)
+            msg = tk.Label(
+                card,
+                text=n.get("content", ""),
+                font=("Times New Roman", 13),
+                bg=THEME["surface"],
+                justify="left",
+                wraplength=responsive_wraplength(base_offset=360, minimum=320),
+            )
             msg.pack(anchor="w")
+
+            def sync_notif_wrap(event, label=msg):
+                label.config(wraplength=max(320, event.width - 40))
+
+            card.bind("<Configure>", sync_notif_wrap)
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")

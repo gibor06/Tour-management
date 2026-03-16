@@ -7,6 +7,7 @@ from datetime import datetime
 import copy
 
 from core.security import prepare_password_for_storage
+from core.system_rules import apply_system_rules
 
 # =========================
 # VALIDATION
@@ -144,6 +145,8 @@ class DataStore:
             b.setdefault("ghiChu", "")
             b.setdefault("danhSachKhach", [])
 
+        self.data = apply_system_rules(self.data)
+
         if os.path.exists(self.rev_path):
             try:
                 with open(self.rev_path, "r", encoding="utf-8") as f:
@@ -167,6 +170,7 @@ class DataStore:
         if folder and not os.path.exists(folder):
             os.makedirs(folder, exist_ok=True)
 
+        self.data = apply_system_rules(self.data)
         clean_data = copy.deepcopy(self.data)
         if "reviews" in clean_data:
             del clean_data["reviews"]
@@ -279,6 +283,12 @@ def create_scrollable_frame(parent, bg):
     scrollbar.pack(side="right", fill="y")
     return outer, content
 
+def responsive_wraplength(widget, offset=80, min_width=260, fallback=760):
+    width = widget.winfo_width()
+    if width <= 1:
+        return fallback
+    return max(min_width, width - offset)
+
 
 # =========================
 # GUIDE UI
@@ -382,7 +392,24 @@ def khoi_tao_hdv(root, user_data=None):
             f"Ghi chú điều hành: {tour.get('ghiChuDieuHanh', '') or 'Không có'}"
         ]
 
-        tk.Label(info_card, text="\n".join(lines), font=("Times New Roman", 13), bg=THEME["surface"], fg=THEME["text"], justify="left", anchor="w", wraplength=760).pack(fill="x")
+        info_label = tk.Label(
+            info_card,
+            text="\n".join(lines),
+            font=("Times New Roman", 13),
+            bg=THEME["surface"],
+            fg=THEME["text"],
+            justify="left",
+            anchor="w",
+            wraplength=responsive_wraplength(info_card, offset=36, min_width=280, fallback=760),
+        )
+        info_label.pack(fill="x")
+
+        def on_info_resize(event):
+            info_label.configure(
+                wraplength=responsive_wraplength(info_card, offset=36, min_width=280, fallback=760)
+            )
+
+        info_card.bind("<Configure>", on_info_resize)
 
         tk.Label(app["detail_frame"], text="DANH SÁCH BOOKING / KHÁCH HÀNG", font=("Times New Roman", 15, "bold"), bg=THEME["bg"], fg=THEME["primary"]).pack(anchor="w", pady=(0, 8))
 
@@ -424,8 +451,10 @@ def khoi_tao_hdv(root, user_data=None):
         tv.pack(side="left", fill="both", expand=True)
 
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        tv.configure(yscrollcommand=sy.set)
+        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
+        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
         sy.pack(side="right", fill="y")
+        sx.pack(side="bottom", fill="x")
 
     def tab_danh_sach_tour():
         clear_container()
@@ -458,11 +487,13 @@ def khoi_tao_hdv(root, user_data=None):
             tv.insert("", "end", values=(t["ma"], t["ten"], t["ngay"], f"{occupied}/{t['khach']}", t["trangThai"]))
 
         apply_zebra(tv)
-        tv.pack(side="left", fill="x", expand=True)
+        tv.pack(side="left", fill="both", expand=True)
 
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        tv.configure(yscrollcommand=sy.set)
+        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
+        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
         sy.pack(side="right", fill="y")
+        sx.pack(side="bottom", fill="x")
 
         tv.bind("<<TreeviewSelect>>", hien_thi_chi_tiet)
 
