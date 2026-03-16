@@ -6,6 +6,9 @@ from tkinter import messagebox, ttk
 from datetime import datetime
 import copy
 
+from core.activity_log import write_activity_log
+from core.security import prepare_password_for_storage
+
 # CÁC HÀM KIỂM TRA DỮ LIỆU (VALIDATION)
 def is_valid_phone(phone):
     """Kiểm tra số điện thoại (10 chữ số, bắt đầu bằng số 0)."""
@@ -129,6 +132,13 @@ class DataStore:
         clean_data = copy.deepcopy(self.data)
         if "reviews" in clean_data: del clean_data["reviews"]
         if "notifications" in clean_data: del clean_data["notifications"]
+        for hdv in clean_data.get("hdv", []):
+            hdv["password"] = prepare_password_for_storage(hdv.get("password", ""))
+        for user in clean_data.get("users", []):
+            user["password"] = prepare_password_for_storage(user.get("password", ""))
+        admin = clean_data.get("admin", {})
+        if isinstance(admin, dict):
+            admin["password"] = prepare_password_for_storage(admin.get("password", ""))
         
         with open(self.path, "w", encoding="utf-8") as f:
             json.dump(clean_data, f, ensure_ascii=False, indent=2)
@@ -578,9 +588,10 @@ def khoi_tao_khach(root, user_data=None):
             row = tk.Frame(card, bg=THEME["surface"])
             row.pack(fill="x", pady=8)
             tk.Label(row, text=label, width=15, anchor="w", bg=THEME["surface"], font=("Times New Roman", 12, "bold")).pack(side="left")
-            e = tk.Entry(row, font=("Times New Roman", 12), relief="solid", bd=1, width=30)
+            e = tk.Entry(row, font=("Times New Roman", 12), relief="solid", bd=1, width=30, show="*" if key == "password" else "")
             e.pack(side="left", ipady=3)
-            e.insert(0, user_info.get(key, ""))
+            if key != "password":
+                e.insert(0, user_info.get(key, ""))
             widgets[key] = e
 
         def save_profile():
@@ -593,15 +604,24 @@ def khoi_tao_khach(root, user_data=None):
                 return messagebox.showwarning("Lỗi", "Họ tên quá ngắn (tối thiểu 3 ký tự).")
             if not is_valid_phone(new_phone):
                 return messagebox.showwarning("Lỗi", "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0).")
-            if not is_valid_password(new_pass):
+            if new_pass and not is_valid_password(new_pass):
                 return messagebox.showwarning("Lỗi", "Mật khẩu quá ngắn (tối thiểu 3 ký tự).")
 
             # Cập nhật thông tin
             user_info["fullname"] = new_fullname
             user_info["sdt"] = new_phone
-            user_info["password"] = new_pass
+            if new_pass:
+                user_info["password"] = prepare_password_for_storage(new_pass)
             
             app["ql"].save()
+            write_activity_log(
+                action="UPDATE_USER_PROFILE",
+                actor=username,
+                role="user",
+                status="SUCCESS",
+                detail="Cập nhật thông tin cá nhân.",
+                datastore=app["ql"],
+            )
             # Cập nhật lại tên hiển thị trên Sidebar ngay lập tức
             user_data["name"] = user_info["fullname"]
             messagebox.showinfo("Thành công", "Đã cập nhật thông tin cá nhân thành công!")

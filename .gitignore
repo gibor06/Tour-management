@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+
+GUI/Admin/data/activity_logs.json

@@ -9,7 +9,12 @@
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
       "trangThai": "Đang dẫn tour",
-      "password": "123"
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV02",
@@ -20,7 +25,12 @@
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
       "trangThai": "Sẵn sàng",
-      "password": "123"
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV03",
@@ -35,7 +45,8 @@
       "skill_score": 100.0,
       "attitude_score": 100.0,
       "problem_solving_score": 100.0,
-      "avg_rating": 100.0
+      "avg_rating": 100.0,
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
     },
     {
       "maHDV": "HDV04",
@@ -45,7 +56,13 @@
       "kn": "3",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV05",
@@ -55,7 +72,13 @@
       "kn": "7",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV06",
@@ -65,7 +88,13 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV07",
@@ -75,7 +104,13 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV08",
@@ -85,7 +120,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV09",
@@ -95,7 +136,13 @@
       "kn": "3",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV10",
@@ -105,7 +152,13 @@
       "kn": "8",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV11",
@@ -115,7 +168,13 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV12",
@@ -125,7 +184,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV13",
@@ -135,7 +200,13 @@
       "kn": "4",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV14",
@@ -145,7 +216,13 @@
       "kn": "7",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV15",
@@ -155,7 +232,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV16",
@@ -165,7 +248,13 @@
       "kn": "3",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV17",
@@ -175,7 +264,13 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV18",
@@ -185,7 +280,13 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV19",
@@ -195,7 +296,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV20",
@@ -205,7 +312,13 @@
       "kn": "7",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV21",
@@ -215,7 +328,13 @@
       "kn": "4",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV22",
@@ -225,7 +344,13 @@
       "kn": "6",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV23",
@@ -235,7 +360,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV24",
@@ -245,7 +376,13 @@
       "kn": "3",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV25",
@@ -255,7 +392,13 @@
       "kn": "8",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV26",
@@ -265,7 +408,13 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV27",
@@ -275,7 +424,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV28",
@@ -285,7 +440,13 @@
       "kn": "6",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV29",
@@ -295,7 +456,13 @@
       "kn": "7",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV30",
@@ -305,7 +472,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV31",
@@ -315,7 +488,13 @@
       "kn": "4",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV32",
@@ -325,7 +504,13 @@
       "kn": "6",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV33",
@@ -335,7 +520,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV34",
@@ -345,7 +536,13 @@
       "kn": "7",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV35",
@@ -355,7 +552,13 @@
       "kn": "4",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV36",
@@ -365,7 +568,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV37",
@@ -375,7 +584,13 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV38",
@@ -385,7 +600,13 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV39",
@@ -395,7 +616,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV40",
@@ -405,7 +632,13 @@
       "kn": "6",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV41",
@@ -415,7 +648,13 @@
       "kn": "7",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV42",
@@ -425,7 +664,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV43",
@@ -435,7 +680,13 @@
       "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV44",
@@ -445,7 +696,13 @@
       "kn": "4",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV45",
@@ -455,7 +712,13 @@
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV46",
@@ -465,7 +728,13 @@
       "kn": "6",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV47",
@@ -475,7 +744,13 @@
       "kn": "4",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV48",
@@ -485,7 +760,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV49",
@@ -495,7 +776,13 @@
       "kn": "7",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     },
     {
       "maHDV": "HDV50",
@@ -505,7 +792,13 @@
       "kn": "5",
       "gioiTinh": "Nữ",
       "khuVuc": "Miền Trung",
-      "trangThai": "Sẵn sàng"
+      "trangThai": "Sẵn sàng",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     }
   ],
   "tours": [
@@ -713,19 +1006,19 @@
   "users": [
     {
       "username": "Khach",
-      "password": "123",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
       "fullname": "Trần Gia Bảo",
       "sdt": "0988111222"
     },
     {
       "username": "KH01",
-      "password": "123",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
       "fullname": "Nguyễn Thị Phương Nhung",
       "sdt": "0909111222"
     }
   ],
   "admin": {
     "username": "admin",
-    "password": "123"
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
   }
 }
