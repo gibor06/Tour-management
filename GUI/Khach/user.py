@@ -43,13 +43,21 @@ def booking_payment_status(total_amount, paid_amount):
 
 
 def build_cash_policy_notice(ngay_khoi_hanh):
-    base_msg = "Nếu 15 ngày trước khi khởi hành không đặt cọc hoặc thanh toán, booking sẽ bị hủy."
+    base_msg = "Tiền mặt: nếu chưa đặt cọc/thanh toán trước hạn, booking sẽ bị hủy tự động."
     try:
         depart_date = datetime.strptime(str(ngay_khoi_hanh or "").strip(), "%d/%m/%Y")
         deadline = (depart_date - timedelta(days=15)).strftime("%d/%m/%Y")
-        return f"Cần đặt cọc/thanh toán trước {deadline}. {base_msg}"
+        return f"Tiền mặt: hạn chót đặt cọc/thanh toán là {deadline}. Booking quá hạn sẽ bị hủy."
     except ValueError:
-        return f"Thanh toán tiền mặt: {base_msg}"
+        return base_msg
+
+
+def short_ui_error(exc, fallback="Không thể gọi API QR. Vui lòng thử lại sau."):
+    text = " ".join(str(exc or "").split())
+    if not text:
+        return fallback
+    # Tránh chuỗi lỗi quá dài gây vỡ layout.
+    return f"{text[:96]}..." if len(text) > 96 else text
 
 
 # =========================
@@ -645,7 +653,7 @@ def khoi_tao_khach(root, user_data=None):
         qr_image_lbl.pack(anchor="center", pady=(6, 6))
 
         qr_status_var = tk.StringVar(value="")
-        tk.Label(
+        qr_status_lbl = tk.Label(
             qr_box,
             textvariable=qr_status_var,
             font=("Times New Roman", 10),
@@ -653,10 +661,11 @@ def khoi_tao_khach(root, user_data=None):
             fg=THEME["note_fg"],
             justify="left",
             wraplength=260
-        ).pack(anchor="w")
+        )
+        qr_status_lbl.pack(anchor="w")
 
         qr_note_var = tk.StringVar(value="")
-        tk.Label(
+        qr_note_lbl = tk.Label(
             qr_box,
             textvariable=qr_note_var,
             font=("Times New Roman", 9, "italic"),
@@ -664,7 +673,8 @@ def khoi_tao_khach(root, user_data=None):
             fg=THEME["muted"],
             justify="left",
             wraplength=260
-        ).pack(anchor="w", pady=(3, 0))
+        )
+        qr_note_lbl.pack(anchor="w", pady=(3, 0))
 
         qr_box.grid_remove()
 
@@ -725,7 +735,7 @@ def khoi_tao_khach(root, user_data=None):
                 qr_image_lbl.config(image="", text="(Không tải được QR)")
                 qr_image_lbl.image = None
                 qr_status_var.set("Không thể gọi API QR. Vui lòng thử lại sau.")
-                qr_note_var.set(str(exc))
+                qr_note_var.set(short_ui_error(exc))
 
         cmb_pay_method.bind("<<ComboboxSelected>>", lambda _e: update_transfer_qr())
         ent_pay_now.bind("<KeyRelease>", lambda _e: update_transfer_qr())
@@ -747,8 +757,12 @@ def khoi_tao_khach(root, user_data=None):
                 detail_fr.grid_rowconfigure(0, weight=1)
                 detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=5)
-                info_note.config(wraplength=max(220, width - 64))
-                cash_policy_lbl.config(wraplength=max(220, width - 64))
+                wrap_size = max(210, min(action_fr.winfo_width() - 32, width - 64))
+                info_note.config(wraplength=wrap_size)
+                cash_policy_lbl.config(wraplength=wrap_size)
+                qr_image_lbl.config(wraplength=wrap_size)
+                qr_status_lbl.config(wraplength=wrap_size)
+                qr_note_lbl.config(wraplength=wrap_size)
                 action_fr.grid_columnconfigure(0, weight=0, minsize=126)
             else:
                 detail_body.grid_configure(row=0, column=0, padx=(0, 12), pady=0, sticky="nsew")
@@ -758,8 +772,12 @@ def khoi_tao_khach(root, user_data=None):
                 detail_fr.grid_rowconfigure(0, weight=1)
                 detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=6)
-                info_note.config(wraplength=260)
-                cash_policy_lbl.config(wraplength=260)
+                wrap_size = max(240, min(action_fr.winfo_width() - 32, 340))
+                info_note.config(wraplength=wrap_size)
+                cash_policy_lbl.config(wraplength=wrap_size)
+                qr_image_lbl.config(wraplength=wrap_size)
+                qr_status_lbl.config(wraplength=wrap_size)
+                qr_note_lbl.config(wraplength=wrap_size)
                 action_fr.grid_columnconfigure(0, weight=0, minsize=132)
 
         detail_fr.bind("<Configure>", sync_detail_layout)
@@ -937,10 +955,15 @@ def khoi_tao_khach(root, user_data=None):
 
         top = tk.Toplevel(root)
         top.title(f"Thanh toán booking {ma_booking}")
-        top.geometry("520x430")
+        screen_w = root.winfo_screenwidth()
+        screen_h = root.winfo_screenheight()
+        popup_w = min(620, max(520, screen_w - 80))
+        popup_h = min(760, max(560, screen_h - 120))
+        top.geometry(f"{popup_w}x{popup_h}")
         top.configure(bg=THEME["bg"])
         top.transient(root)
         top.grab_set()
+        top.resizable(True, True)
 
         card = tk.Frame(top, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=20)
         card.pack(fill="both", expand=True, padx=16, pady=16)
@@ -976,7 +999,7 @@ def khoi_tao_khach(root, user_data=None):
 
         tour_for_booking = app["ql"].find_tour(booking.get("maTour", ""))
         cash_policy_var = tk.StringVar(value="")
-        tk.Label(
+        cash_policy_lbl = tk.Label(
             card,
             textvariable=cash_policy_var,
             bg=THEME["surface"],
@@ -984,7 +1007,8 @@ def khoi_tao_khach(root, user_data=None):
             justify="left",
             font=("Times New Roman", 11, "bold"),
             wraplength=460
-        ).pack(anchor="w", pady=(0, 10))
+        )
+        cash_policy_lbl.pack(anchor="w", pady=(0, 10))
 
         tk.Label(card, text="Số tiền thanh toán thêm:", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 12, "bold")).pack(anchor="w")
         amount_entry = tk.Entry(card, font=("Times New Roman", 12), relief="solid", bd=1)
@@ -1013,7 +1037,7 @@ def khoi_tao_khach(root, user_data=None):
         qr_image_lbl.pack(anchor="center", pady=(6, 6))
 
         qr_status_var = tk.StringVar(value="")
-        tk.Label(
+        qr_status_lbl = tk.Label(
             qr_box,
             textvariable=qr_status_var,
             font=("Times New Roman", 10),
@@ -1021,10 +1045,11 @@ def khoi_tao_khach(root, user_data=None):
             fg=THEME["note_fg"],
             justify="left",
             wraplength=420
-        ).pack(anchor="w")
+        )
+        qr_status_lbl.pack(anchor="w")
 
         qr_note_var = tk.StringVar(value="")
-        tk.Label(
+        qr_note_lbl = tk.Label(
             qr_box,
             textvariable=qr_note_var,
             font=("Times New Roman", 9, "italic"),
@@ -1032,7 +1057,18 @@ def khoi_tao_khach(root, user_data=None):
             fg=THEME["muted"],
             justify="left",
             wraplength=420
-        ).pack(anchor="w", pady=(3, 0))
+        )
+        qr_note_lbl.pack(anchor="w", pady=(3, 0))
+
+        def sync_payment_layout(_event=None):
+            wrap_size = max(260, card.winfo_width() - 56)
+            cash_policy_lbl.config(wraplength=wrap_size)
+            qr_image_lbl.config(wraplength=wrap_size)
+            qr_status_lbl.config(wraplength=wrap_size)
+            qr_note_lbl.config(wraplength=wrap_size)
+
+        card.bind("<Configure>", sync_payment_layout)
+        sync_payment_layout()
 
         def update_payment_qr():
             if method_var.get().strip() != "Chuyển khoản":
@@ -1066,7 +1102,7 @@ def khoi_tao_khach(root, user_data=None):
                 qr_image_lbl.config(image="", text="(Không tải được QR)")
                 qr_image_lbl.image = None
                 qr_status_var.set("Không thể gọi API QR. Vui lòng thử lại sau.")
-                qr_note_var.set(str(exc))
+                qr_note_var.set(short_ui_error(exc))
 
         cmb_method.bind("<<ComboboxSelected>>", lambda _e: update_payment_qr())
         amount_entry.bind("<KeyRelease>", lambda _e: update_payment_qr())
