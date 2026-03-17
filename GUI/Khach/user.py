@@ -5,6 +5,10 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from datetime import datetime
 import copy
+import base64
+import math
+from urllib.parse import quote_plus
+from urllib.request import urlopen
 
 from core.security import prepare_password_for_storage
 from core.system_rules import apply_system_rules
@@ -63,12 +67,53 @@ TOUR_LOCK_CANCEL_STATUSES = ["Đã chốt đoàn", "Chờ khởi hành", "Đang 
 BOOKING_CANCEL_STATUSES = ["Đã hủy", "Chờ hoàn tiền", "Hoàn tiền"]
 PAYMENT_METHODS = [
     "Tiền mặt",
-    "Chuyển khoản",
-    "Thẻ",
-    "Momo",
-    "ZaloPay",
-    "VNPay",
+    "Chuyển khoản"
 ]
+
+TRANSFER_QR_CONFIG = {
+    "bank_id": os.getenv("TRAVEL_BANK_ID", "ACB"),
+    "account_no": os.getenv("TRAVEL_BANK_ACCOUNT", "41389377"),
+    "account_name": os.getenv("TRAVEL_BANK_NAME", "VIETNAM TRAVEL"),
+    "template": os.getenv("TRAVEL_QR_TEMPLATE", "compact"),
+}
+
+
+def build_transfer_qr_url(amount, transfer_content):
+    bank_id = str(TRANSFER_QR_CONFIG.get("bank_id", "")).strip()
+    account_no = str(TRANSFER_QR_CONFIG.get("account_no", "")).strip()
+    account_name = str(TRANSFER_QR_CONFIG.get("account_name", "")).strip()
+    template = str(TRANSFER_QR_CONFIG.get("template", "compact2")).strip() or "compact2"
+
+    if not bank_id or not account_no:
+        raise ValueError("Thiếu cấu hình ngân hàng nhận chuyển khoản.")
+
+    amount_value = max(0, safe_int(amount))
+    add_info = quote_plus(str(transfer_content or "").strip())
+    account_name_q = quote_plus(account_name)
+    return (
+        f"https://img.vietqr.io/image/{bank_id}-{account_no}-{template}.png"
+        f"?amount={amount_value}&addInfo={add_info}&accountName={account_name_q}"
+    )
+
+
+def scale_photo_to_square(photo, max_size_px=220):
+    max_size = max(80, safe_int(max_size_px))
+    width = max(1, photo.width())
+    height = max(1, photo.height())
+    ratio = max(width / max_size, height / max_size)
+    step = max(1, math.ceil(ratio))
+    if step > 1:
+        return photo.subsample(step, step)
+    return photo
+
+
+def fetch_transfer_qr_photo(qr_url, max_size_px=220):
+    with urlopen(qr_url, timeout=10) as response:
+        payload = response.read()
+    if not payload:
+        raise ValueError("API QR không trả dữ liệu ảnh.")
+    raw_photo = tk.PhotoImage(data=base64.b64encode(payload).decode("ascii"))
+    return scale_photo_to_square(raw_photo, max_size_px)
 
 # =========================
 # PATH DỮ LIỆU
@@ -556,8 +601,111 @@ def khoi_tao_khach(root, user_data=None):
         )
         info_note.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(2, 10))
 
+        qr_box = tk.Frame(action_fr, bg=THEME["note_bg"], bd=1, relief="solid", padx=8, pady=8)
+        qr_box.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
+        tk.Label(
+            qr_box,
+            text="QR Chuyển khoản",
+            font=("Times New Roman", 12, "bold"),
+            bg=THEME["note_bg"],
+            fg=THEME["note_fg"],
+        ).pack(anchor="w")
+
+        qr_image_lbl = tk.Label(
+            qr_box,
+            text="",
+            bg=THEME["note_bg"],
+            fg=THEME["muted"],
+            justify="center",
+            wraplength=240
+        )
+        qr_image_lbl.pack(anchor="center", pady=(6, 6))
+
+        qr_status_var = tk.StringVar(value="")
+        tk.Label(
+            qr_box,
+            textvariable=qr_status_var,
+            font=("Times New Roman", 10),
+            bg=THEME["note_bg"],
+            fg=THEME["note_fg"],
+            justify="left",
+            wraplength=260
+        ).pack(anchor="w")
+
+        qr_note_var = tk.StringVar(value="")
+        tk.Label(
+            qr_box,
+            textvariable=qr_note_var,
+            font=("Times New Roman", 9, "italic"),
+            bg=THEME["note_bg"],
+            fg=THEME["muted"],
+            justify="left",
+            wraplength=260
+        ).pack(anchor="w", pady=(3, 0))
+
+        qr_box.grid_remove()
+
         action_btn_row = tk.Frame(action_fr, bg=THEME["surface"])
-        action_btn_row.grid(row=5, column=0, columnspan=2, sticky="ew")
+        action_btn_row.grid(row=6, column=0, columnspan=2, sticky="ew")
+
+        def get_selected_tour_and_amount():
+            sel = tv.selection()
+            if not sel:
+                return None, 0, max(1, safe_int(spn_people.get()))
+
+            ma = tv.item(sel[0])["values"][0]
+            tour = app["ql"].find_tour(ma)
+            num_people = max(1, safe_int(spn_people.get()))
+            pay_now = max(0, safe_int(ent_pay_now.get()))
+            return tour, pay_now, num_people
+
+        def update_transfer_qr():
+            if pay_method_var.get().strip() != "Chuyển khoản":
+                qr_box.grid_remove()
+                qr_image_lbl.config(image="", text="")
+                qr_image_lbl.image = None
+                qr_status_var.set("")
+                qr_note_var.set("")
+                return
+
+            qr_box.grid()
+            tour, pay_now, num_people = get_selected_tour_and_amount()
+            if not tour:
+                qr_image_lbl.config(image="", text="Chọn tour để tạo QR")
+                qr_image_lbl.image = None
+                qr_status_var.set("Vui lòng chọn tour ở bảng phía trên.")
+                qr_note_var.set("")
+                return
+
+            if pay_now <= 0:
+                pay_now = safe_int(tour.get("gia", 0)) * num_people
+
+            if pay_now <= 0:
+                qr_image_lbl.config(image="", text="Không đủ dữ liệu để tạo QR")
+                qr_image_lbl.image = None
+                qr_status_var.set("Số tiền thanh toán phải lớn hơn 0.")
+                qr_note_var.set("")
+                return
+
+            transfer_content = f"{tour.get('ma', '')}-{user_data.get('username', 'KH')}-{pay_now}"
+            try:
+                qr_url = build_transfer_qr_url(pay_now, transfer_content)
+                qr_photo = fetch_transfer_qr_photo(qr_url, max_size_px=190)
+                qr_image_lbl.config(image=qr_photo, text="")
+                qr_image_lbl.image = qr_photo
+                qr_status_var.set(f"Quét mã để chuyển khoản {pay_now:,}đ".replace(",", "."))
+                qr_note_var.set("Nội dung CK được tạo tự động theo mã tour và tài khoản khách.")
+            except Exception as exc:
+                qr_image_lbl.config(image="", text="(Không tải được QR)")
+                qr_image_lbl.image = None
+                qr_status_var.set("Không thể gọi API QR. Vui lòng thử lại sau.")
+                qr_note_var.set(str(exc))
+
+        cmb_pay_method.bind("<<ComboboxSelected>>", lambda _e: update_transfer_qr())
+        ent_pay_now.bind("<KeyRelease>", lambda _e: update_transfer_qr())
+        spn_people.config(command=update_transfer_qr)
+        spn_people.bind("<KeyRelease>", lambda _e: update_transfer_qr())
 
         def sync_detail_layout(event=None):
             width = detail_fr.winfo_width()
@@ -614,6 +762,7 @@ def khoi_tao_khach(root, user_data=None):
                 f"Ghi chú điều hành: {t.get('ghiChuDieuHanh', '') or 'Không có'}"
             ]
             set_detail_content("\n".join(info))
+            update_transfer_qr()
 
         tv.bind("<<TreeviewSelect>>", on_select)
 
@@ -785,19 +934,98 @@ def khoi_tao_khach(root, user_data=None):
         if current_method not in PAYMENT_METHODS:
             current_method = PAYMENT_METHODS[0]
         method_var = tk.StringVar(value=current_method)
-        ttk.Combobox(
+        cmb_method = ttk.Combobox(
             card,
             textvariable=method_var,
             values=PAYMENT_METHODS,
             state="readonly",
             font=("Times New Roman", 11),
             width=28,
-        ).pack(anchor="w", pady=(4, 12))
+        )
+        cmb_method.pack(anchor="w", pady=(4, 12))
 
         tk.Label(card, text="Số tiền thanh toán thêm:", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 12, "bold")).pack(anchor="w")
         amount_entry = tk.Entry(card, font=("Times New Roman", 12), relief="solid", bd=1)
         amount_entry.insert(0, str(con_no))
         amount_entry.pack(anchor="w", pady=(4, 10), fill="x")
+
+        qr_box = tk.Frame(card, bg=THEME["note_bg"], bd=1, relief="solid", padx=8, pady=8)
+        qr_box.pack(fill="x", pady=(0, 10))
+
+        tk.Label(
+            qr_box,
+            text="QR Chuyển khoản",
+            font=("Times New Roman", 12, "bold"),
+            bg=THEME["note_bg"],
+            fg=THEME["note_fg"],
+        ).pack(anchor="w")
+
+        qr_image_lbl = tk.Label(
+            qr_box,
+            text="",
+            bg=THEME["note_bg"],
+            fg=THEME["muted"],
+            justify="center",
+            wraplength=240
+        )
+        qr_image_lbl.pack(anchor="center", pady=(6, 6))
+
+        qr_status_var = tk.StringVar(value="")
+        tk.Label(
+            qr_box,
+            textvariable=qr_status_var,
+            font=("Times New Roman", 10),
+            bg=THEME["note_bg"],
+            fg=THEME["note_fg"],
+            justify="left",
+            wraplength=420
+        ).pack(anchor="w")
+
+        qr_note_var = tk.StringVar(value="")
+        tk.Label(
+            qr_box,
+            textvariable=qr_note_var,
+            font=("Times New Roman", 9, "italic"),
+            bg=THEME["note_bg"],
+            fg=THEME["muted"],
+            justify="left",
+            wraplength=420
+        ).pack(anchor="w", pady=(3, 0))
+
+        def update_payment_qr():
+            if method_var.get().strip() != "Chuyển khoản":
+                qr_box.pack_forget()
+                qr_image_lbl.config(image="", text="")
+                qr_image_lbl.image = None
+                qr_status_var.set("")
+                qr_note_var.set("")
+                return
+
+            qr_box.pack(fill="x", pady=(0, 10), before=btns)
+            pay_more = max(0, safe_int(amount_entry.get()))
+            if pay_more <= 0:
+                qr_image_lbl.config(image="", text="Nhập số tiền để tạo QR")
+                qr_image_lbl.image = None
+                qr_status_var.set("Số tiền thanh toán thêm phải lớn hơn 0.")
+                qr_note_var.set("")
+                return
+
+            transfer_content = f"{ma_booking}-{user_data.get('username', 'KH')}-{pay_more}"
+            try:
+                qr_url = build_transfer_qr_url(pay_more, transfer_content)
+                qr_photo = fetch_transfer_qr_photo(qr_url, max_size_px=220)
+                qr_image_lbl.config(image=qr_photo, text="")
+                qr_image_lbl.image = qr_photo
+                qr_status_var.set(f"Quét mã để thanh toán thêm {pay_more:,}đ".replace(",", "."))
+                qr_note_var.set("Nội dung CK được tạo tự động theo mã booking.")
+            except Exception as exc:
+                qr_image_lbl.config(image="", text="(Không tải được QR)")
+                qr_image_lbl.image = None
+                qr_status_var.set("Không thể gọi API QR. Vui lòng thử lại sau.")
+                qr_note_var.set(str(exc))
+
+        cmb_method.bind("<<ComboboxSelected>>", lambda _e: update_payment_qr())
+        amount_entry.bind("<KeyRelease>", lambda _e: update_payment_qr())
 
         def submit_payment():
             pay_more = safe_int(amount_entry.get())
@@ -823,6 +1051,7 @@ def khoi_tao_khach(root, user_data=None):
         btns.pack(fill="x", pady=(8, 0))
         style_button(btns, "Xác nhận", THEME["success"], submit_payment).pack(side="left", fill="x", expand=True, padx=(0, 6))
         style_button(btns, "Đóng", THEME["muted"], top.destroy).pack(side="left", fill="x", expand=True)
+        update_payment_qr()
 
     def huy_tour(ma_booking):
         booking = next((b for b in app["ql"].list_bookings if b["maBooking"] == ma_booking), None)
