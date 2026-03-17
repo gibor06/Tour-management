@@ -32,19 +32,24 @@ def safe_int(value):
 # THEME
 # =========================
 THEME = {
-    "bg": "#f8fafc",
+    "bg": "#f1f5f9",
     "surface": "#ffffff",
-    "sidebar": "#0f172a",
+    "sidebar": "#0b1220",
+    "sidebar_hover": "#16233b",
+    "sidebar_active": "#1e3a8a",
     "primary": "#2563eb",
     "success": "#059669",
     "danger": "#dc2626",
     "warning": "#d97706",
     "text": "#0f172a",
     "muted": "#64748b",
-    "border": "#cbd5e1",
+    "border": "#d2dae6",
+    "header_bg": "#ffffff",
+    "status_bg": "#e8eef8",
+    "heading_bg": "#e2e8f0",
     "note_bg": "#fff7ed",
     "note_fg": "#9a3412",
-    "zebra_even": "#f8fafc",
+    "zebra_even": "#f8fbff",
     "zebra_odd": "#ffffff",
 }
 
@@ -259,10 +264,13 @@ def style_button(parent, text, bg, command, fg="white"):
         relief="flat",
         bd=0,
         cursor="hand2",
-        font=("Times New Roman", 12, "bold"),
+        font=("Times New Roman", 11, "bold"),
         padx=14,
-        pady=8,
-        command=command
+        pady=9,
+        highlightthickness=1,
+        highlightbackground=bg,
+        highlightcolor=bg,
+        command=command,
     )
 
 def create_scrollable_frame(parent, bg):
@@ -302,64 +310,219 @@ def khoi_tao_hdv(root, user_data=None):
         "ql": DataStore(),
         "user": user_data,
         "container": None,
+        "content_canvas": None,
         "tv_tours": None,
         "detail_frame": None,
+        "active_menu_btn": None,
+        "page_title_var": tk.StringVar(value="Lịch Trình Tour"),
+        "page_subtitle_var": tk.StringVar(value="Theo dõi các tour được phân công và danh sách khách"),
+        "status_var": tk.StringVar(value="Sẵn sàng làm việc"),
+        "status_label": None,
     }
 
     for widget in root.winfo_children():
         widget.destroy()
 
     root.title("VIETNAM TRAVEL - HƯỚNG DẪN VIÊN")
-    root.geometry("1180x720")
-    root.minsize(980, 620)
+    root.geometry("1240x760")
+    root.minsize(1040, 660)
     root.configure(bg=THEME["bg"])
 
     style = ttk.Style()
     style.theme_use("clam")
-    style.configure("Treeview", font=("Times New Roman", 12), rowheight=32, background=THEME["surface"], fieldbackground=THEME["surface"], foreground=THEME["text"])
-    style.configure("Treeview.Heading", font=("Times New Roman", 12, "bold"), background="#e2e8f0", foreground=THEME["text"])
-    style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "Treeview",
+        font=("Times New Roman", 12),
+        rowheight=34,
+        background=THEME["surface"],
+        fieldbackground=THEME["surface"],
+        foreground=THEME["text"],
+        bordercolor=THEME["border"],
+        relief="flat",
+    )
+    style.configure(
+        "Treeview.Heading",
+        font=("Times New Roman", 12, "bold"),
+        background=THEME["heading_bg"],
+        foreground=THEME["text"],
+        relief="flat",
+    )
+    style.map("Treeview", background=[("selected", "#dbeafe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "TScrollbar",
+        bordercolor=THEME["border"],
+        troughcolor="#eef2ff",
+        background="#94a3b8",
+        darkcolor="#94a3b8",
+        lightcolor="#94a3b8",
+    )
 
-    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=260)
+    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=270)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    tk.Label(sidebar, text="VIETNAM\nTRAVEL", justify="center", bg=THEME["sidebar"], fg="#10b981", font=("Times New Roman", 19, "bold"), pady=24).pack(fill="x")
+    brand = tk.Frame(sidebar, bg=THEME["sidebar"])
+    brand.pack(fill="x", padx=16, pady=(20, 12))
+    tk.Label(
+        brand,
+        text="VIETNAM TRAVEL",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#34d399",
+        font=("Times New Roman", 18, "bold"),
+    ).pack(fill="x")
+    tk.Label(
+        brand,
+        text="Guide Control Center",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#93c5fd",
+        font=("Times New Roman", 10, "italic"),
+    ).pack(fill="x", pady=(2, 0))
 
     ten_hdv = user_data.get("tenHDV", "Hướng Dẫn Viên")
-    tk.Label(sidebar, text=f"XIN CHÀO,\n{ten_hdv}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 11, "bold"), pady=10, wraplength=220, justify="center").pack(fill="x")
+    hello = tk.Frame(sidebar, bg="#111b30", highlightbackground="#243450", highlightthickness=1)
+    hello.pack(fill="x", padx=16, pady=(0, 8))
+    tk.Label(
+        hello,
+        text=f"XIN CHÀO,\n{ten_hdv}",
+        bg="#111b30",
+        fg="#dbeafe",
+        font=("Times New Roman", 11, "bold"),
+        pady=10,
+        wraplength=220,
+        justify="center",
+    ).pack(fill="x")
 
     menu = tk.Frame(sidebar, bg=THEME["sidebar"])
-    menu.pack(fill="x", padx=10, pady=20)
+    menu.pack(fill="x", padx=10, pady=(10, 0))
 
-    def menu_btn(text, cmd):
-        return tk.Button(
+    def set_status(text, color=THEME["primary"]):
+        app["status_var"].set(text)
+        if app.get("status_label"):
+            app["status_label"].config(fg=color)
+
+    def set_active_menu(button):
+        prev = app.get("active_menu_btn")
+        if prev and prev.winfo_exists() and prev is not button:
+            prev.configure(bg=THEME["sidebar"], fg="#dbe4f5")
+        app["active_menu_btn"] = button
+        button.configure(bg=THEME["sidebar_active"], fg="white")
+
+    def menu_btn(text, cmd, icon=""):
+        label = f"  {icon}  {text}" if icon else f"  {text}"
+        btn = tk.Button(
             menu,
-            text=f"   {text}",
+            text=label,
             bg=THEME["sidebar"],
-            fg="white",
-            activebackground="#1e293b",
+            fg="#dbe4f5",
+            activebackground=THEME["sidebar_active"],
             activeforeground="white",
             relief="flat",
             bd=0,
             cursor="hand2",
             anchor="w",
-            font=("Times New Roman", 14, "bold"),
-            padx=16,
-            pady=14,
+            font=("Times New Roman", 13, "bold"),
+            padx=12,
+            pady=12,
             command=cmd,
         )
+        btn.bind("<Enter>", lambda _e, b=btn: b.configure(bg=THEME["sidebar_hover"]) if app.get("active_menu_btn") is not b else None)
+        btn.bind("<Leave>", lambda _e, b=btn: b.configure(bg=THEME["sidebar"]) if app.get("active_menu_btn") is not b else None)
+        return btn
 
     right_panel = tk.Frame(root, bg=THEME["bg"])
     right_panel.pack(side="left", fill="both", expand=True)
 
-    content_area = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=20)
-    content_area.pack(fill="both", expand=True)
+    header = tk.Frame(
+        right_panel,
+        bg=THEME["header_bg"],
+        height=82,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    header.pack(side="top", fill="x", padx=16, pady=(16, 10))
+    header.pack_propagate(False)
+
+    head_left = tk.Frame(header, bg=THEME["header_bg"])
+    head_left.pack(side="left", fill="both", expand=True, padx=14, pady=10)
+    tk.Label(
+        head_left,
+        textvariable=app["page_title_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["text"],
+        font=("Times New Roman", 18, "bold"),
+        anchor="w",
+    ).pack(anchor="w")
+    tk.Label(
+        head_left,
+        textvariable=app["page_subtitle_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["muted"],
+        font=("Times New Roman", 11, "italic"),
+        anchor="w",
+    ).pack(anchor="w", pady=(2, 0))
+
+    content_shell = tk.Frame(right_panel, bg=THEME["bg"])
+    content_shell.pack(fill="both", expand=True, padx=16)
+
+    content_canvas = tk.Canvas(content_shell, bg=THEME["bg"], highlightthickness=0, bd=0)
+    outer_sy = ttk.Scrollbar(content_shell, orient="vertical", command=content_canvas.yview)
+    content_canvas.configure(yscrollcommand=outer_sy.set)
+
+    outer_sy.pack(side="right", fill="y")
+    content_canvas.pack(side="left", fill="both", expand=True)
+
+    content_area = tk.Frame(content_canvas, bg=THEME["bg"], padx=8, pady=8)
+    canvas_window = content_canvas.create_window((0, 0), window=content_area, anchor="nw")
+
+    def on_content_configure(_event):
+        content_canvas.configure(scrollregion=content_canvas.bbox("all"))
+
+    def on_canvas_resize(event):
+        content_canvas.itemconfigure(canvas_window, width=max(event.width - 2, 1))
+
+    def on_outer_mousewheel(event):
+        try:
+            content_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        except Exception:
+            pass
+
+    content_area.bind("<Configure>", on_content_configure)
+    content_canvas.bind("<Configure>", on_canvas_resize)
+    content_canvas.bind("<Enter>", lambda _e: content_canvas.bind_all("<MouseWheel>", on_outer_mousewheel))
+    content_canvas.bind("<Leave>", lambda _e: content_canvas.unbind_all("<MouseWheel>"))
+
     app["container"] = content_area
+    app["content_canvas"] = content_canvas
+
+    status_bar = tk.Frame(
+        right_panel,
+        bg=THEME["status_bg"],
+        height=34,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    status_bar.pack(side="bottom", fill="x", padx=16, pady=(0, 14))
+    status_bar.pack_propagate(False)
+    app["status_label"] = tk.Label(
+        status_bar,
+        textvariable=app["status_var"],
+        bg=THEME["status_bg"],
+        fg=THEME["primary"],
+        anchor="w",
+        padx=12,
+        font=("Times New Roman", 11, "italic"),
+    )
+    app["status_label"].pack(fill="both", expand=True)
 
     def clear_container():
         for widget in content_area.winfo_children():
             widget.destroy()
+        if app.get("content_canvas"):
+            app["content_canvas"].yview_moveto(0)
 
     def get_my_tours():
         ma_hdv = user_data.get("maHDV", "")
@@ -411,13 +574,21 @@ def khoi_tao_hdv(root, user_data=None):
 
         info_card.bind("<Configure>", on_info_resize)
 
-        tk.Label(app["detail_frame"], text="DANH SÁCH BOOKING / KHÁCH HÀNG", font=("Times New Roman", 15, "bold"), bg=THEME["bg"], fg=THEME["primary"]).pack(anchor="w", pady=(0, 8))
+        tk.Label(
+            app["detail_frame"],
+            text="DANH SÁCH BOOKING / KHÁCH HÀNG",
+            font=("Times New Roman", 15, "bold"),
+            bg=THEME["bg"],
+            fg=THEME["primary"],
+        ).pack(anchor="w", pady=(0, 8))
 
         wrapper = tk.Frame(app["detail_frame"], bg=THEME["surface"], bd=1, relief="solid")
         wrapper.pack(fill="both", expand=True)
+        wrapper.pack_propagate(False)
+        wrapper.configure(height=230)
 
         cols = ("stt", "ten", "sdt", "sl", "tt", "thanhtoan")
-        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=8)
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=7)
 
         tv.heading("stt", text="STT")
         tv.heading("ten", text="Tên khách hàng")
@@ -426,12 +597,12 @@ def khoi_tao_hdv(root, user_data=None):
         tv.heading("tt", text="Trạng thái")
         tv.heading("thanhtoan", text="Đã thanh toán")
 
-        tv.column("stt", width=50, anchor="center")
-        tv.column("ten", width=220, anchor="w")
-        tv.column("sdt", width=120, anchor="center")
-        tv.column("sl", width=90, anchor="center")
-        tv.column("tt", width=150, anchor="center")
-        tv.column("thanhtoan", width=140, anchor="center")
+        tv.column("stt", width=60, minwidth=50, anchor="center", stretch=False)
+        tv.column("ten", width=260, minwidth=200, anchor="w", stretch=False)
+        tv.column("sdt", width=130, minwidth=110, anchor="center", stretch=False)
+        tv.column("sl", width=90, minwidth=80, anchor="center", stretch=False)
+        tv.column("tt", width=170, minwidth=130, anchor="center", stretch=False)
+        tv.column("thanhtoan", width=150, minwidth=120, anchor="center", stretch=False)
 
         for i, b in enumerate(bookings, 1):
             tv.insert(
@@ -447,13 +618,26 @@ def khoi_tao_hdv(root, user_data=None):
                 )
             )
 
+        if not bookings:
+            tv.insert("", "end", values=("", "Chưa có booking nào cho tour này", "", "", "", ""))
+
         apply_zebra(tv)
+        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
+        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+        sy.pack(side="right", fill="y")
+        sx.pack(side="bottom", fill="x")
         tv.pack(side="left", fill="both", expand=True)
 
-        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+        def fit_booking_columns(event=None):
+            width = max(760, wrapper.winfo_width() - 24)
+            ratios = {"stt": 0.08, "ten": 0.32, "sdt": 0.16, "sl": 0.10, "tt": 0.20, "thanhtoan": 0.14}
+            mins = {"stt": 50, "ten": 200, "sdt": 110, "sl": 80, "tt": 130, "thanhtoan": 120}
+            for col in cols:
+                tv.column(col, width=max(mins[col], int(width * ratios[col])))
 
-        tv.configure(yscrollcommand=sy.set)
-        sy.pack(side="right", fill="y")
+        wrapper.bind("<Configure>", fit_booking_columns)
+        fit_booking_columns()
 
     def tab_danh_sach_tour():
         clear_container()
@@ -464,6 +648,8 @@ def khoi_tao_hdv(root, user_data=None):
 
         wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
         wrapper.pack(fill="x")
+        wrapper.pack_propagate(False)
+        wrapper.configure(height=290)
 
         cols = ("ma", "ten", "ngay", "khach", "tt")
         tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=6)
@@ -475,27 +661,38 @@ def khoi_tao_hdv(root, user_data=None):
         tv.heading("khach", text="Số khách")
         tv.heading("tt", text="Trạng thái")
 
-        tv.column("ma", width=90, anchor="center")
-        tv.column("ten", width=320, anchor="w")
-        tv.column("ngay", width=130, anchor="center")
-        tv.column("khach", width=100, anchor="center")
-        tv.column("tt", width=150, anchor="center")
+        tv.column("ma", width=90, minwidth=80, anchor="center", stretch=False)
+        tv.column("ten", width=360, minwidth=260, anchor="w", stretch=False)
+        tv.column("ngay", width=150, minwidth=120, anchor="center", stretch=False)
+        tv.column("khach", width=110, minwidth=90, anchor="center", stretch=False)
+        tv.column("tt", width=150, minwidth=130, anchor="center", stretch=False)
 
         for t in my_tours:
             occupied = app["ql"].get_occupied_seats(t["ma"])
             tv.insert("", "end", values=(t["ma"], t["ten"], t["ngay"], f"{occupied}/{t['khach']}", t["trangThai"]))
 
         apply_zebra(tv)
+        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
+        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
+        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+        sy.pack(side="right", fill="y")
+        sx.pack(side="bottom", fill="x")
         tv.pack(side="left", fill="both", expand=True)
 
-        sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        tv.configure(yscrollcommand=sy.set)
-        sy.pack(side="right", fill="y")
+        def fit_tour_columns(event=None):
+            width = max(760, wrapper.winfo_width() - 24)
+            ratios = {"ma": 0.11, "ten": 0.42, "ngay": 0.18, "khach": 0.13, "tt": 0.16}
+            mins = {"ma": 80, "ten": 260, "ngay": 120, "khach": 90, "tt": 130}
+            for col in cols:
+                tv.column(col, width=max(mins[col], int(width * ratios[col])))
+
+        wrapper.bind("<Configure>", fit_tour_columns)
+        fit_tour_columns()
 
         tv.bind("<<TreeviewSelect>>", hien_thi_chi_tiet)
 
         app["detail_frame"] = tk.Frame(content_area, bg=THEME["bg"])
-        app["detail_frame"].pack(fill="both", expand=True, pady=12)
+        app["detail_frame"].pack(fill="both", expand=True, pady=(12, 0))
 
         if not my_tours:
             tk.Label(app["detail_frame"], text="Hiện tại bạn chưa có tour nào được phân công.", font=("Times New Roman", 13), bg=THEME["bg"], fg=THEME["muted"]).pack(pady=20)
@@ -689,31 +886,57 @@ def khoi_tao_hdv(root, user_data=None):
 
         style_button(card, "CẬP NHẬT THÔNG TIN", THEME["success"], save_profile).pack(pady=20)
 
-    menu_btn("Lịch Trình Tour", tab_danh_sach_tour).pack(fill="x", pady=4)
-    menu_btn("Hiệu Suất & Đánh Giá", tab_thong_ke).pack(fill="x", pady=4)
-    menu_btn("Gửi Thông Báo", tab_thong_bao).pack(fill="x", pady=4)
-    menu_btn("Cài Đặt Tài Khoản", tab_cai_dat).pack(fill="x", pady=4)
+    def open_view(title, subtitle, view_fn, button):
+        set_active_menu(button)
+        app["page_title_var"].set(title)
+        app["page_subtitle_var"].set(subtitle)
+        view_fn()
+        set_status(f"Đang ở {title}", THEME["primary"])
 
-    tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=16)
+    nav_items = [
+        ("Lịch Trình Tour", "Theo dõi các tour được phân công và danh sách khách", tab_danh_sach_tour, "▣"),
+        ("Hiệu Suất & Đánh Giá", "Tổng hợp hiệu suất và phản hồi từ khách hàng", tab_thong_ke, "◈"),
+        ("Gửi Thông Báo", "Gửi thông báo khẩn cấp đến từng đoàn tour", tab_thong_bao, "✦"),
+        ("Cài Đặt Tài Khoản", "Quản lý thông tin cá nhân của hướng dẫn viên", tab_cai_dat, "⚙"),
+    ]
 
+    nav_buttons = []
+    for idx, (title, subtitle, view_fn, icon) in enumerate(nav_items):
+        btn = menu_btn(
+            title,
+            lambda t=title, s=subtitle, f=view_fn, b_idx=idx: open_view(t, s, f, nav_buttons[b_idx]),
+            icon=icon,
+        )
+        btn.pack(fill="x", pady=3)
+        nav_buttons.append(btn)
+
+    util = tk.Frame(sidebar, bg=THEME["sidebar"])
+    util.pack(side="bottom", fill="x", padx=10, pady=14)
+
+    tk.Frame(util, bg="#2e3b56", height=1).pack(fill="x", pady=(0, 10))
     tk.Button(
-        sidebar,
-        text="   Đăng Xuất",
-        bg=THEME["sidebar"],
+        util,
+        text="  ⏻  Đăng xuất hệ thống",
+        bg="#7f1d1d",
         fg="white",
-        activebackground="#1e293b",
+        activebackground="#991b1b",
         activeforeground="white",
         relief="flat",
         bd=0,
         cursor="hand2",
         anchor="w",
-        font=("Times New Roman", 14, "bold"),
-        padx=16,
-        pady=14,
-        command=lambda: logout_system(root)
-    ).pack(fill="x", side="bottom", padx=10, pady=20)
+        font=("Times New Roman", 12, "bold"),
+        padx=12,
+        pady=10,
+        command=lambda: logout_system(root),
+    ).pack(fill="x")
 
-    tab_danh_sach_tour()
+    open_view(
+        "Lịch Trình Tour",
+        "Theo dõi các tour được phân công và danh sách khách",
+        tab_danh_sach_tour,
+        nav_buttons[0],
+    )
 
 
 def logout_system(root):
