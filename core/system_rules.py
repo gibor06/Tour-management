@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 
 CANCEL_BOOKING_STATUSES = {"Đã hủy", "Chờ hoàn tiền", "Hoàn tiền"}
 TERMINAL_TOUR_STATUSES = {"Hoàn tất", "Đã hủy", "Tạm hoãn"}
+AUTO_CANCEL_UNPAID_DAYS = 15
 
 
 def _safe_int(value, default=0):
@@ -45,6 +46,18 @@ def _normalize_booking(booking: dict, tours_by_code: dict[str, dict], today: dat
     if tien_coc > da_thanh_toan:
         tien_coc = da_thanh_toan
 
+    auto_cancel_unpaid = False
+    if tour and da_thanh_toan <= 0 and tien_coc <= 0:
+        ngay_khoi_hanh = _parse_ddmmyyyy(tour.get("ngay"))
+        if ngay_khoi_hanh:
+            payment_deadline = ngay_khoi_hanh - timedelta(days=AUTO_CANCEL_UNPAID_DAYS)
+            auto_cancel_unpaid = today >= payment_deadline
+            if auto_cancel_unpaid:
+                auto_note = f"[AUTO] Hủy do chưa đặt cọc/thanh toán trước hạn {payment_deadline.strftime('%d/%m/%Y')}."
+                existing_note = str(booking.get("ghiChu", "") or "").strip()
+                if auto_note not in existing_note:
+                    booking["ghiChu"] = f"{auto_note} {existing_note}".strip()
+
     status = str(booking.get("trangThai", "")).strip()
     if status in CANCEL_BOOKING_STATUSES:
         if status == "Đã hủy" and da_thanh_toan > 0:
@@ -52,6 +65,9 @@ def _normalize_booking(booking: dict, tours_by_code: dict[str, dict], today: dat
         if status == "Hoàn tiền":
             da_thanh_toan = 0
             tien_coc = 0
+        con_no = 0
+    elif auto_cancel_unpaid:
+        status = "Đã hủy"
         con_no = 0
     else:
         if da_thanh_toan <= 0:
