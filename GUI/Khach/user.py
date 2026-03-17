@@ -64,19 +64,24 @@ def short_ui_error(exc, fallback="Không thể gọi API QR. Vui lòng thử l�
 # THEME
 # =========================
 THEME = {
-    "bg": "#f8fafc",
+    "bg": "#f1f5f9",
     "surface": "#ffffff",
-    "sidebar": "#0f172a",
+    "sidebar": "#0b1220",
+    "sidebar_hover": "#16233b",
+    "sidebar_active": "#1e3a8a",
     "primary": "#2563eb",
     "success": "#059669",
     "danger": "#dc2626",
     "warning": "#d97706",
     "text": "#0f172a",
     "muted": "#64748b",
-    "border": "#cbd5e1",
+    "border": "#d2dae6",
+    "header_bg": "#ffffff",
+    "status_bg": "#e8eef8",
+    "heading_bg": "#e2e8f0",
     "note_bg": "#fff7ed",
     "note_fg": "#9a3412",
-    "zebra_even": "#f8fafc",
+    "zebra_even": "#f8fbff",
     "zebra_odd": "#ffffff",
 }
 
@@ -330,9 +335,22 @@ def apply_zebra(tree):
 
 def style_button(parent, text, bg, command, fg="white"):
     return tk.Button(
-        parent, text=text, bg=bg, fg=fg, activebackground=bg, activeforeground=fg,
-        relief="flat", bd=0, cursor="hand2", font=("Times New Roman", 12, "bold"),
-        padx=14, pady=8, command=command
+        parent,
+        text=text,
+        bg=bg,
+        fg=fg,
+        activebackground=bg,
+        activeforeground=fg,
+        relief="flat",
+        bd=0,
+        cursor="hand2",
+        font=("Times New Roman", 11, "bold"),
+        padx=14,
+        pady=9,
+        highlightthickness=1,
+        highlightbackground=bg,
+        highlightcolor=bg,
+        command=command,
     )
 
 
@@ -348,64 +366,218 @@ def khoi_tao_khach(root, user_data=None):
         "ql": DataStore(),
         "user": user_data,
         "container": None,
+        "content_canvas": None,
         "tv_tours": None,
-        "detail_var": tk.StringVar(value="Chọn một tour để xem chi tiết và đăng ký.")
+        "detail_var": tk.StringVar(value="Chọn một tour để xem chi tiết và đăng ký."),
+        "active_menu_btn": None,
+        "page_title_var": tk.StringVar(value="Khám phá Tour"),
+        "page_subtitle_var": tk.StringVar(value="Xem lịch khởi hành, tình trạng chỗ trống và đăng ký nhanh."),
+        "status_var": tk.StringVar(value="Sẵn sàng"),
+        "status_label": None,
     }
 
     for widget in root.winfo_children():
         widget.destroy()
 
     root.title("VIETNAM TRAVEL - KHÁCH HÀNG")
-    root.geometry("1180x720")
-    root.minsize(980, 620)
+    root.geometry("1240x760")
+    root.minsize(1040, 660)
     root.configure(bg=THEME["bg"])
 
     style = ttk.Style()
     style.theme_use("clam")
-    style.configure("Treeview", font=("Times New Roman", 12), rowheight=32, background=THEME["surface"], fieldbackground=THEME["surface"], foreground=THEME["text"])
-    style.configure("Treeview.Heading", font=("Times New Roman", 12, "bold"), background="#e2e8f0", foreground=THEME["text"])
-    style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "Treeview",
+        font=("Times New Roman", 12),
+        rowheight=34,
+        background=THEME["surface"],
+        fieldbackground=THEME["surface"],
+        foreground=THEME["text"],
+        bordercolor=THEME["border"],
+        relief="flat",
+    )
+    style.configure(
+        "Treeview.Heading",
+        font=("Times New Roman", 12, "bold"),
+        background=THEME["heading_bg"],
+        foreground=THEME["text"],
+        relief="flat",
+    )
+    style.map("Treeview", background=[("selected", "#dbeafe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "TScrollbar",
+        bordercolor=THEME["border"],
+        troughcolor="#eef2ff",
+        background="#94a3b8",
+        darkcolor="#94a3b8",
+        lightcolor="#94a3b8",
+    )
 
-    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=260)
+    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=270)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    tk.Label(sidebar, text="VIETNAM\nTRAVEL", justify="center", bg=THEME["sidebar"], fg="#10b981", font=("Times New Roman", 19, "bold"), pady=24).pack(fill="x")
+    brand = tk.Frame(sidebar, bg=THEME["sidebar"])
+    brand.pack(fill="x", padx=16, pady=(20, 12))
+    tk.Label(
+        brand,
+        text="VIETNAM TRAVEL",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#34d399",
+        font=("Times New Roman", 18, "bold"),
+    ).pack(fill="x")
+    tk.Label(
+        brand,
+        text="Customer Experience Center",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#93c5fd",
+        font=("Times New Roman", 10, "italic"),
+    ).pack(fill="x", pady=(2, 0))
 
     hello_name = user_data.get("fullname") or user_data.get("name", "Khách hàng")
-    tk.Label(sidebar, text=f"XIN CHÀO,\n{hello_name}", bg=THEME["sidebar"], fg="#cbd5e1", font=("Times New Roman", 11, "bold"), pady=10, wraplength=220, justify="center").pack(fill="x")
+    hello_card = tk.Frame(sidebar, bg="#111b30", highlightbackground="#243450", highlightthickness=1)
+    hello_card.pack(fill="x", padx=16, pady=(0, 8))
+    tk.Label(
+        hello_card,
+        text=f"XIN CHÀO,\n{hello_name}",
+        bg="#111b30",
+        fg="#dbeafe",
+        font=("Times New Roman", 11, "bold"),
+        pady=10,
+        wraplength=220,
+        justify="center",
+    ).pack(fill="x")
 
     menu = tk.Frame(sidebar, bg=THEME["sidebar"])
-    menu.pack(fill="x", padx=10, pady=20)
+    menu.pack(fill="x", padx=10, pady=(10, 0))
 
-    def menu_btn(text, cmd):
-        return tk.Button(
+    def set_status(text, color=THEME["primary"]):
+        app["status_var"].set(text)
+        if app.get("status_label"):
+            app["status_label"].config(fg=color)
+
+    def set_active_menu(button):
+        prev = app.get("active_menu_btn")
+        if prev and prev.winfo_exists() and prev is not button:
+            prev.configure(bg=THEME["sidebar"], fg="#dbe4f5")
+        app["active_menu_btn"] = button
+        button.configure(bg=THEME["sidebar_active"], fg="white")
+
+    def menu_btn(text, cmd, icon=""):
+        label = f"  {icon}  {text}" if icon else f"  {text}"
+        btn = tk.Button(
             menu,
-            text=f"   {text}",
+            text=label,
             bg=THEME["sidebar"],
-            fg="white",
-            activebackground="#1e293b",
+            fg="#dbe4f5",
+            activebackground=THEME["sidebar_active"],
             activeforeground="white",
             relief="flat",
             bd=0,
             cursor="hand2",
             anchor="w",
-            font=("Times New Roman", 14, "bold"),
-            padx=16,
-            pady=14,
+            font=("Times New Roman", 13, "bold"),
+            padx=12,
+            pady=12,
             command=cmd,
         )
+        btn.bind("<Enter>", lambda _e, b=btn: b.configure(bg=THEME["sidebar_hover"]) if app.get("active_menu_btn") is not b else None)
+        btn.bind("<Leave>", lambda _e, b=btn: b.configure(bg=THEME["sidebar"]) if app.get("active_menu_btn") is not b else None)
+        return btn
 
     right_panel = tk.Frame(root, bg=THEME["bg"])
     right_panel.pack(side="left", fill="both", expand=True)
 
-    content_area = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=20)
-    content_area.pack(fill="both", expand=True)
+    header = tk.Frame(
+        right_panel,
+        bg=THEME["header_bg"],
+        height=82,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    header.pack(side="top", fill="x", padx=16, pady=(16, 10))
+    header.pack_propagate(False)
+
+    head_left = tk.Frame(header, bg=THEME["header_bg"])
+    head_left.pack(side="left", fill="both", expand=True, padx=14, pady=10)
+    tk.Label(
+        head_left,
+        textvariable=app["page_title_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["text"],
+        font=("Times New Roman", 18, "bold"),
+        anchor="w",
+    ).pack(anchor="w")
+    tk.Label(
+        head_left,
+        textvariable=app["page_subtitle_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["muted"],
+        font=("Times New Roman", 11, "italic"),
+        anchor="w",
+    ).pack(anchor="w", pady=(2, 0))
+
+    content_shell = tk.Frame(right_panel, bg=THEME["bg"])
+    content_shell.pack(fill="both", expand=True, padx=16)
+
+    content_canvas = tk.Canvas(content_shell, bg=THEME["bg"], highlightthickness=0, bd=0)
+    outer_sy = ttk.Scrollbar(content_shell, orient="vertical", command=content_canvas.yview)
+    content_canvas.configure(yscrollcommand=outer_sy.set)
+    outer_sy.pack(side="right", fill="y")
+    content_canvas.pack(side="left", fill="both", expand=True)
+
+    content_area = tk.Frame(content_canvas, bg=THEME["bg"], padx=8, pady=8)
+    canvas_window = content_canvas.create_window((0, 0), window=content_area, anchor="nw")
+
+    def on_content_configure(_event):
+        content_canvas.configure(scrollregion=content_canvas.bbox("all"))
+
+    def on_canvas_resize(event):
+        content_canvas.itemconfigure(canvas_window, width=max(event.width - 2, 1))
+
+    def on_outer_mousewheel(event):
+        try:
+            content_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        except Exception:
+            pass
+
+    content_area.bind("<Configure>", on_content_configure)
+    content_canvas.bind("<Configure>", on_canvas_resize)
+    content_canvas.bind("<Enter>", lambda _e: content_canvas.bind_all("<MouseWheel>", on_outer_mousewheel))
+    content_canvas.bind("<Leave>", lambda _e: content_canvas.unbind_all("<MouseWheel>"))
+
     app["container"] = content_area
+    app["content_canvas"] = content_canvas
+
+    status_bar = tk.Frame(
+        right_panel,
+        bg=THEME["status_bg"],
+        height=34,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    status_bar.pack(side="bottom", fill="x", padx=16, pady=(0, 14))
+    status_bar.pack_propagate(False)
+    app["status_label"] = tk.Label(
+        status_bar,
+        textvariable=app["status_var"],
+        bg=THEME["status_bg"],
+        fg=THEME["primary"],
+        anchor="w",
+        padx=12,
+        font=("Times New Roman", 11, "italic"),
+    )
+    app["status_label"].pack(fill="both", expand=True)
 
     def clear_container():
         for widget in content_area.winfo_children():
             widget.destroy()
+        if app.get("content_canvas"):
+            app["content_canvas"].yview_moveto(0)
 
     def get_current_user():
         username = user_data.get("username", "")
@@ -423,25 +595,15 @@ def khoi_tao_khach(root, user_data=None):
     def tab_danh_sach_tour():
         clear_container()
 
-        tab_canvas = tk.Canvas(content_area, bg=THEME["bg"], highlightthickness=0, bd=0)
-        tab_scroll = ttk.Scrollbar(content_area, orient="vertical", command=tab_canvas.yview)
-        tab_canvas.pack(side="left", fill="both", expand=True)
-        tab_scroll.pack(side="right", fill="y")
+        tk.Label(
+            content_area,
+            text="KHÁM PHÁ CÁC TOUR DU LỊCH",
+            font=("Times New Roman", 20, "bold"),
+            bg=THEME["bg"],
+            fg=THEME["text"],
+        ).pack(anchor="w", pady=(0, 15))
 
-        tab_body = tk.Frame(tab_canvas, bg=THEME["bg"])
-        tab_window = tab_canvas.create_window((0, 0), window=tab_body, anchor="nw")
-        tab_canvas.configure(yscrollcommand=tab_scroll.set)
-
-        tab_body.bind("<Configure>", lambda e: tab_canvas.configure(scrollregion=tab_canvas.bbox("all")))
-
-        def _on_canvas_resize(event):
-            tab_canvas.itemconfigure(tab_window, width=event.width)
-
-        tab_canvas.bind("<Configure>", _on_canvas_resize)
-
-        tk.Label(tab_body, text="KHÁM PHÁ CÁC TOUR DU LỊCH", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 15))
-
-        wrapper = tk.Frame(tab_body, bg=THEME["surface"], bd=1, relief="solid")
+        wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
         wrapper.pack(fill="x")
 
         cols = ("ma", "ten", "ngay", "gia", "khach", "tt")
@@ -489,7 +651,7 @@ def khoi_tao_khach(root, user_data=None):
         # KHUNG CHI TIẾT & ĐĂNG KÝ
         # =========================
         detail_fr = tk.LabelFrame(
-            tab_body,
+            content_area,
             text="Chi tiết tour & Đăng ký",
             font=("Times New Roman", 14, "bold"),
             bg=THEME["surface"],
@@ -1356,17 +1518,11 @@ def khoi_tao_khach(root, user_data=None):
             tk.Label(content_area, text="Hiện chưa có thông báo nào từ đoàn của bạn.", font=("Times New Roman", 13), bg=THEME["bg"], fg=THEME["muted"]).pack(pady=50)
             return
 
-        canvas = tk.Canvas(content_area, bg=THEME["bg"], highlightthickness=0)
-        scrollbar = ttk.Scrollbar(content_area, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg=THEME["bg"])
-
-        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        list_area = tk.Frame(content_area, bg=THEME["bg"])
+        list_area.pack(fill="both", expand=True)
 
         for n in relevant_notifs:
-            card = tk.Frame(scrollable_frame, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=15)
+            card = tk.Frame(list_area, bg=THEME["surface"], bd=1, relief="solid", padx=20, pady=15)
             card.pack(fill="x", pady=8)
 
             header_fr = tk.Frame(card, bg=THEME["surface"])
@@ -1392,35 +1548,53 @@ def khoi_tao_khach(root, user_data=None):
 
             card.bind("<Configure>", sync_notif_wrap)
 
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+    def open_view(title, subtitle, view_fn, menu_button):
+        app["page_title_var"].set(title)
+        app["page_subtitle_var"].set(subtitle)
+        set_active_menu(menu_button)
+        view_fn()
+        set_status(f"Đang ở mục: {title}", THEME["primary"])
 
-    menu_btn("Khám phá Tour", tab_danh_sach_tour).pack(fill="x", pady=4)
-    menu_btn("Tour đã đặt", tab_tour_da_dat).pack(fill="x", pady=4)
-    menu_btn("Thông báo", tab_thong_bao).pack(fill="x", pady=4)
-    menu_btn("Gửi đánh giá", tab_gui_danh_gia).pack(fill="x", pady=4)
-    menu_btn("Hồ sơ cá nhân", tab_ho_so).pack(fill="x", pady=4)
+    nav_buttons = []
+    nav_views = [
+        ("Khám phá Tour", "Xem danh sách tour mở bán và đăng ký nhanh.", tab_danh_sach_tour, ""),
+        ("Tour đã đặt", "Theo dõi lịch sử booking và trạng thái thanh toán.", tab_tour_da_dat, ""),
+        ("Thông báo", "Cập nhật thông báo mới nhất từ đoàn và hướng dẫn viên.", tab_thong_bao, ""),
+        ("Gửi đánh giá", "Góp ý dịch vụ và đánh giá chất lượng hướng dẫn viên.", tab_gui_danh_gia, ""),
+        ("Hồ sơ cá nhân", "Quản lý thông tin cá nhân và bảo mật tài khoản.", tab_ho_so, ""),
+    ]
+
+    for idx, (title, subtitle, view_fn, icon) in enumerate(nav_views):
+        btn = menu_btn(
+            title,
+            lambda t=title, s=subtitle, f=view_fn, b_idx=idx: open_view(t, s, f, nav_buttons[b_idx]),
+            icon=icon,
+        )
+        btn.pack(fill="x", pady=4)
+        nav_buttons.append(btn)
 
     tk.Frame(sidebar, bg="#334155", height=1).pack(fill="x", padx=16, pady=16)
 
     tk.Button(
         sidebar,
-        text="   Đăng Xuất",
-        bg=THEME["sidebar"],
+        text="  Đăng xuất",
+        bg="#991b1b",
         fg="white",
-        activebackground="#1e293b",
+        activebackground="#b91c1c",
         activeforeground="white",
         relief="flat",
         bd=0,
         cursor="hand2",
         anchor="w",
-        font=("Times New Roman", 14, "bold"),
-        padx=16,
-        pady=14,
+        font=("Times New Roman", 13, "bold"),
+        padx=14,
+        pady=12,
         command=lambda: logout_user(root)
     ).pack(fill="x", side="bottom", padx=10, pady=20)
 
-    tab_danh_sach_tour()
+    if nav_buttons:
+        first_title, first_subtitle, first_view, _first_icon = nav_views[0]
+        open_view(first_title, first_subtitle, first_view, nav_buttons[0])
 
 
 def logout_user(root):
@@ -1439,7 +1613,7 @@ def logout_user(root):
 if __name__ == "__main__":
     win = tk.Tk()
     win.title("Vietnam Travel 2026")
-    win.geometry("1180x720")
-    win.minsize(980, 620)
+    win.geometry("1240x760")
+    win.minsize(1040, 660)
     khoi_tao_khach(win, {"username": "Khach", "name": "Khách hàng", "fullname": "Khách hàng mẫu", "sdt": "0988111222"})
     win.mainloop()
