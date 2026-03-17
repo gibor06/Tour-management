@@ -13,19 +13,24 @@ from core.system_rules import apply_system_rules
 # THEME
 # =========================
 THEME = {
-    "bg": "#f8fafc",
+    "bg": "#f1f5f9",
     "surface": "#ffffff",
-    "sidebar": "#0f172a",
+    "sidebar": "#0b1220",
+    "sidebar_hover": "#16233b",
+    "sidebar_active": "#1e3a8a",
     "primary": "#2563eb",
     "success": "#059669",
     "danger": "#dc2626",
     "warning": "#d97706",
     "text": "#0f172a",
     "muted": "#64748b",
-    "border": "#cbd5e1",
+    "border": "#d2dae6",
+    "status_bg": "#e8eef8",
+    "header_bg": "#ffffff",
+    "heading_bg": "#e2e8f0",
     "note_bg": "#fff7ed",
     "note_fg": "#9a3412",
-    "zebra_even": "#f8fafc",
+    "zebra_even": "#f8fbff",
     "zebra_odd": "#ffffff",
 }
 
@@ -325,9 +330,12 @@ def style_button(parent, text, bg, command, fg="white"):
         relief="flat",
         bd=0,
         cursor="hand2",
-        font=("Times New Roman", 12, "bold"),
+        font=("Times New Roman", 11, "bold"),
         padx=14,
-        pady=8,
+        pady=9,
+        highlightthickness=1,
+        highlightbackground=bg,
+        highlightcolor=bg,
         command=command,
     )
 
@@ -1501,13 +1509,27 @@ def admin_feedback_tab(app):
     rev_tv.heading("content", text="Nội dung đánh giá")
     rev_tv.heading("date", text="Ngày gửi")
 
-    rev_tv.column("user", width=150, anchor="w")
-    rev_tv.column("target", width=150, anchor="center")
-    rev_tv.column("content", width=500, anchor="w")
-    rev_tv.column("date", width=150, anchor="center")
+    rev_tv.column("user", width=170, minwidth=150, anchor="w", stretch=False)
+    rev_tv.column("target", width=140, minwidth=120, anchor="center", stretch=False)
+    rev_tv.column("content", width=520, minwidth=320, anchor="w", stretch=False)
+    rev_tv.column("date", width=150, minwidth=130, anchor="center", stretch=False)
 
+    rev_sy = ttk.Scrollbar(rev_wrapper, orient="vertical", command=rev_tv.yview)
+    rev_sx = ttk.Scrollbar(rev_wrapper, orient="horizontal", command=rev_tv.xview)
+    rev_tv.configure(yscrollcommand=rev_sy.set, xscrollcommand=rev_sx.set)
+    rev_sy.pack(side="right", fill="y")
+    rev_sx.pack(side="bottom", fill="x")
     rev_tv.pack(side="left", fill="both", expand=True)
-    ttk.Scrollbar(rev_wrapper, orient="vertical", command=rev_tv.yview).pack(side="right", fill="y")
+
+    def fit_review_columns(event=None):
+        width = max(760, rev_wrapper.winfo_width() - 24)
+        ratios = {"user": 0.21, "target": 0.15, "content": 0.47, "date": 0.17}
+        mins = {"user": 150, "target": 120, "content": 320, "date": 130}
+        for col in ["user", "target", "content", "date"]:
+            rev_tv.column(col, width=max(mins[col], int(width * ratios[col])))
+
+    rev_wrapper.bind("<Configure>", fit_review_columns)
+    fit_review_columns()
 
     for r in app["ql"].list_reviews:
         target_display = r.get("target", "Công ty")
@@ -1534,14 +1556,28 @@ def admin_feedback_tab(app):
     notif_tv.heading("content", text="Nội dung thông báo")
     notif_tv.heading("date", text="Ngày gửi")
 
-    notif_tv.column("ma", width=100, anchor="center")
-    notif_tv.column("ten", width=150, anchor="w")
-    notif_tv.column("tour", width=220, anchor="w")
-    notif_tv.column("content", width=400, anchor="w")
-    notif_tv.column("date", width=150, anchor="center")
+    notif_tv.column("ma", width=100, minwidth=90, anchor="center", stretch=False)
+    notif_tv.column("ten", width=150, minwidth=130, anchor="w", stretch=False)
+    notif_tv.column("tour", width=220, minwidth=180, anchor="w", stretch=False)
+    notif_tv.column("content", width=440, minwidth=300, anchor="w", stretch=False)
+    notif_tv.column("date", width=150, minwidth=130, anchor="center", stretch=False)
 
+    notif_sy = ttk.Scrollbar(notif_wrapper, orient="vertical", command=notif_tv.yview)
+    notif_sx = ttk.Scrollbar(notif_wrapper, orient="horizontal", command=notif_tv.xview)
+    notif_tv.configure(yscrollcommand=notif_sy.set, xscrollcommand=notif_sx.set)
+    notif_sy.pack(side="right", fill="y")
+    notif_sx.pack(side="bottom", fill="x")
     notif_tv.pack(side="left", fill="both", expand=True)
-    ttk.Scrollbar(notif_wrapper, orient="vertical", command=notif_tv.yview).pack(side="right", fill="y")
+
+    def fit_notif_columns(event=None):
+        width = max(860, notif_wrapper.winfo_width() - 24)
+        ratios = {"ma": 0.10, "ten": 0.15, "tour": 0.20, "content": 0.39, "date": 0.16}
+        mins = {"ma": 90, "ten": 130, "tour": 180, "content": 300, "date": 130}
+        for col in ["ma", "ten", "tour", "content", "date"]:
+            notif_tv.column(col, width=max(mins[col], int(width * ratios[col])))
+
+    notif_wrapper.bind("<Configure>", fit_notif_columns)
+    fit_notif_columns()
 
     for n in app["ql"].list_notifications:
         tour_info = f"{n.get('maTour', 'N/A')} - {n.get('tenTour', '')}"
@@ -1591,15 +1627,38 @@ def main(root=None):
         root = tk.Tk()
 
     root.title("VIETNAM TRAVEL - HỆ THỐNG QUẢN TRỊ VIÊN")
-    root.geometry("1180x720")
-    root.minsize(980, 620)
+    root.geometry("1240x760")
+    root.minsize(1040, 660)
     root.configure(bg=THEME["bg"])
 
     style = ttk.Style()
     style.theme_use("clam")
-    style.configure("Treeview", font=("Times New Roman", 12), rowheight=32, background=THEME["surface"], fieldbackground=THEME["surface"], foreground=THEME["text"])
-    style.configure("Treeview.Heading", font=("Times New Roman", 12, "bold"), background="#e2e8f0", foreground=THEME["text"])
-    style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "Treeview",
+        font=("Times New Roman", 12),
+        rowheight=34,
+        background=THEME["surface"],
+        fieldbackground=THEME["surface"],
+        foreground=THEME["text"],
+        bordercolor=THEME["border"],
+        relief="flat",
+    )
+    style.configure(
+        "Treeview.Heading",
+        font=("Times New Roman", 12, "bold"),
+        background=THEME["heading_bg"],
+        foreground=THEME["text"],
+        relief="flat",
+    )
+    style.map("Treeview", background=[("selected", "#dbeafe")], foreground=[("selected", THEME["text"])])
+    style.configure(
+        "TScrollbar",
+        bordercolor=THEME["border"],
+        troughcolor="#eef2ff",
+        background="#94a3b8",
+        darkcolor="#94a3b8",
+        lightcolor="#94a3b8",
+    )
 
     app = {
         "root": root,
@@ -1615,69 +1674,206 @@ def main(root=None):
         "search_user_var": tk.StringVar(),
         "search_tour_var": tk.StringVar(),
         "search_booking_var": tk.StringVar(),
+        "page_title_var": tk.StringVar(value="Tổng quan Dashboard"),
+        "page_subtitle_var": tk.StringVar(value=""),
+        "active_menu_btn": None,
     }
 
-    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=250)
+    sidebar = tk.Frame(root, bg=THEME["sidebar"], width=270)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    tk.Label(sidebar, text="VIETNAM\nTRAVEL", justify="center", bg=THEME["sidebar"], fg="#10b981", font=("Times New Roman", 19, "bold"), pady=24).pack(fill="x")
+    brand = tk.Frame(sidebar, bg=THEME["sidebar"])
+    brand.pack(fill="x", padx=16, pady=(20, 12))
+
+    tk.Label(
+        brand,
+        text="VIETNAM TRAVEL",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#34d399",
+        font=("Times New Roman", 18, "bold"),
+    ).pack(fill="x")
+    tk.Label(
+        brand,
+        text="Admin Control Center",
+        justify="left",
+        anchor="w",
+        bg=THEME["sidebar"],
+        fg="#93c5fd",
+        font=("Times New Roman", 10, "italic"),
+    ).pack(fill="x", pady=(2, 0))
 
     menu = tk.Frame(sidebar, bg=THEME["sidebar"])
-    menu.pack(fill="x", padx=10)
+    menu.pack(fill="x", padx=10, pady=(6, 0))
 
-    def menu_btn(text, cmd):
-        return tk.Button(
+    def set_active_menu(button):
+        prev = app.get("active_menu_btn")
+        if prev and prev.winfo_exists() and prev is not button:
+            prev.configure(bg=THEME["sidebar"], fg="#dbe4f5")
+        app["active_menu_btn"] = button
+        button.configure(bg=THEME["sidebar_active"], fg="white")
+
+    def menu_btn(text, cmd, icon=""):
+        label = f"  {icon}  {text}" if icon else f"  {text}"
+        btn = tk.Button(
             menu,
-            text=f"   {text}",
+            text=label,
             bg=THEME["sidebar"],
-            fg="white",
-            activebackground="#1e293b",
+            fg="#dbe4f5",
+            activebackground=THEME["sidebar_active"],
             activeforeground="white",
             relief="flat",
             bd=0,
             cursor="hand2",
             anchor="w",
-            font=("Times New Roman", 14, "bold"),
-            padx=16,
-            pady=14,
+            font=("Times New Roman", 13, "bold"),
+            padx=12,
+            pady=12,
             command=cmd,
         )
+        btn.bind("<Enter>", lambda _e, b=btn: b.configure(bg=THEME["sidebar_hover"]) if app.get("active_menu_btn") is not b else None)
+        btn.bind("<Leave>", lambda _e, b=btn: b.configure(bg=THEME["sidebar"]) if app.get("active_menu_btn") is not b else None)
+        return btn
 
-    menu_btn("Tổng quan Dashboard", lambda: dashboard_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Quản lý HDV", lambda: admin_hdv_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Quản lý Khách hàng", lambda: admin_user_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Quản lý Tour", lambda: admin_tour_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Quản lý Booking", lambda: admin_booking_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Đánh giá & Thông báo", lambda: admin_feedback_tab(app)).pack(fill="x", pady=4)
-    menu_btn("Lưu dữ liệu JSON", lambda: manual_save(app)).pack(fill="x", pady=4)
+    def open_view(title, subtitle, view_fn, button):
+        set_active_menu(button)
+        app["page_title_var"].set(title)
+        app["page_subtitle_var"].set(subtitle)
+        view_fn()
 
-    tk.Frame(sidebar, bg="#64748b", height=2).pack(fill="x", padx=16, pady=16)
-    
-    menu_btn("Đăng xuất hệ thống", lambda: logout(app)).pack(fill="x", pady=4)
+    nav_items = [
+        ("Tổng quan Dashboard", "", lambda: dashboard_tab(app), "▦"),
+        ("Quản lý HDV", "Quản trị thông tin và trạng thái hướng dẫn viên", lambda: admin_hdv_tab(app), "◉"),
+        ("Quản lý Khách hàng", "Theo dõi hồ sơ và dữ liệu khách hàng", lambda: admin_user_tab(app), "◎"),
+        ("Quản lý Tour", "Điều phối tour, trạng thái và chi phí", lambda: admin_tour_tab(app), "▣"),
+        ("Quản lý Booking", "Theo dõi đặt chỗ, thanh toán và công nợ", lambda: admin_booking_tab(app), "◈"),
+        ("Đánh giá & Thông báo", "Tổng hợp phản hồi khách hàng và thông báo HDV", lambda: admin_feedback_tab(app), "✦"),
+    ]
+
+    nav_buttons = []
+    for idx, (title, subtitle, view_fn, icon) in enumerate(nav_items):
+        btn = menu_btn(title, lambda t=title, s=subtitle, f=view_fn, b_idx=idx: open_view(t, s, f, nav_buttons[b_idx]), icon=icon)
+        btn.pack(fill="x", pady=3)
+        nav_buttons.append(btn)
+
+    util = tk.Frame(sidebar, bg=THEME["sidebar"])
+    util.pack(side="bottom", fill="x", padx=10, pady=14)
+
+    tk.Frame(util, bg="#2e3b56", height=1).pack(fill="x", pady=(0, 10))
+    tk.Button(
+        util,
+        text="  ⭳  Lưu dữ liệu JSON",
+        bg="#1f2937",
+        fg="#fde68a",
+        activebackground="#374151",
+        activeforeground="#fde68a",
+        relief="flat",
+        bd=0,
+        cursor="hand2",
+        anchor="w",
+        font=("Times New Roman", 12, "bold"),
+        padx=12,
+        pady=10,
+        command=lambda: manual_save(app),
+    ).pack(fill="x", pady=(0, 6))
+    tk.Button(
+        util,
+        text="  ⏻  Đăng xuất hệ thống",
+        bg="#7f1d1d",
+        fg="white",
+        activebackground="#991b1b",
+        activeforeground="white",
+        relief="flat",
+        bd=0,
+        cursor="hand2",
+        anchor="w",
+        font=("Times New Roman", 12, "bold"),
+        padx=12,
+        pady=10,
+        command=lambda: logout(app),
+    ).pack(fill="x")
 
     right_panel = tk.Frame(root, bg=THEME["bg"])
     right_panel.pack(side="right", fill="both", expand=True)
 
-    app["container"] = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=20)
+    header = tk.Frame(
+        right_panel,
+        bg=THEME["header_bg"],
+        height=82,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    header.pack(side="top", fill="x", padx=16, pady=(16, 10))
+    header.pack_propagate(False)
+
+    head_left = tk.Frame(header, bg=THEME["header_bg"])
+    head_left.pack(side="left", fill="both", expand=True, padx=14, pady=10)
+    tk.Label(
+        head_left,
+        textvariable=app["page_title_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["text"],
+        font=("Times New Roman", 18, "bold"),
+        anchor="w",
+    ).pack(anchor="w")
+    tk.Label(
+        head_left,
+        textvariable=app["page_subtitle_var"],
+        bg=THEME["header_bg"],
+        fg=THEME["muted"],
+        font=("Times New Roman", 11, "italic"),
+        anchor="w",
+    ).pack(anchor="w", pady=(2, 0))
+
+    head_right = tk.Frame(header, bg=THEME["header_bg"])
+    head_right.pack(side="right", padx=14)
+    tk.Label(
+        head_right,
+        text="Quản trị viên",
+        bg=THEME["header_bg"],
+        fg=THEME["primary"],
+        font=("Times New Roman", 12, "bold"),
+    ).pack(anchor="e")
+    tk.Label(
+        head_right,
+        text=datetime.now().strftime("%d/%m/%Y"),
+        bg=THEME["header_bg"],
+        fg=THEME["muted"],
+        font=("Times New Roman", 10),
+    ).pack(anchor="e")
+
+    app["container"] = tk.Frame(right_panel, bg=THEME["bg"], padx=24, pady=18)
     app["container"].pack(fill="both", expand=True)
 
-    status_bar = tk.Frame(right_panel, bg="#e2e8f0", height=30)
-    status_bar.pack(side="bottom", fill="x")
+    status_bar = tk.Frame(
+        right_panel,
+        bg=THEME["status_bg"],
+        height=34,
+        highlightbackground=THEME["border"],
+        highlightthickness=1,
+    )
+    status_bar.pack(side="bottom", fill="x", padx=16, pady=(0, 14))
     status_bar.pack_propagate(False)
 
     app["status_label"] = tk.Label(
         status_bar,
         textvariable=app["status_var"],
-        bg="#e2e8f0",
+        bg=THEME["status_bg"],
         fg=THEME["primary"],
         anchor="w",
-        padx=10,
+        padx=12,
         font=("Times New Roman", 11, "italic")
     )
     app["status_label"].pack(fill="both", expand=True)
 
-    dashboard_tab(app)
+    open_view(
+        "Tổng quan Dashboard",
+        "",
+        lambda: dashboard_tab(app),
+        nav_buttons[0],
+    )
 
     if root is not None and not isinstance(root, tk.Tk):
         return
