@@ -597,12 +597,12 @@ def khoi_tao_hdv(root, user_data=None):
         tv.heading("tt", text="Trạng thái")
         tv.heading("thanhtoan", text="Đã thanh toán")
 
-        tv.column("stt", width=60, minwidth=50, anchor="center", stretch=False)
-        tv.column("ten", width=260, minwidth=200, anchor="w", stretch=False)
-        tv.column("sdt", width=130, minwidth=110, anchor="center", stretch=False)
-        tv.column("sl", width=90, minwidth=80, anchor="center", stretch=False)
-        tv.column("tt", width=170, minwidth=130, anchor="center", stretch=False)
-        tv.column("thanhtoan", width=150, minwidth=120, anchor="center", stretch=False)
+        tv.column("stt", width=60, minwidth=48, anchor="center", stretch=True)
+        tv.column("ten", width=260, minwidth=170, anchor="w", stretch=True)
+        tv.column("sdt", width=130, minwidth=100, anchor="center", stretch=True)
+        tv.column("sl", width=90, minwidth=76, anchor="center", stretch=True)
+        tv.column("tt", width=170, minwidth=120, anchor="center", stretch=True)
+        tv.column("thanhtoan", width=150, minwidth=110, anchor="center", stretch=True)
 
         for i, b in enumerate(bookings, 1):
             tv.insert(
@@ -623,16 +623,14 @@ def khoi_tao_hdv(root, user_data=None):
 
         apply_zebra(tv)
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
-        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+        tv.configure(yscrollcommand=sy.set)
         sy.pack(side="right", fill="y")
-        sx.pack(side="bottom", fill="x")
         tv.pack(side="left", fill="both", expand=True)
 
         def fit_booking_columns(event=None):
-            width = max(760, wrapper.winfo_width() - 24)
+            width = max(520, wrapper.winfo_width() - 20)
             ratios = {"stt": 0.08, "ten": 0.32, "sdt": 0.16, "sl": 0.10, "tt": 0.20, "thanhtoan": 0.14}
-            mins = {"stt": 50, "ten": 200, "sdt": 110, "sl": 80, "tt": 130, "thanhtoan": 120}
+            mins = {"stt": 48, "ten": 170, "sdt": 100, "sl": 76, "tt": 120, "thanhtoan": 110}
             for col in cols:
                 tv.column(col, width=max(mins[col], int(width * ratios[col])))
 
@@ -648,11 +646,9 @@ def khoi_tao_hdv(root, user_data=None):
 
         wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
         wrapper.pack(fill="x")
-        wrapper.pack_propagate(False)
-        wrapper.configure(height=290)
 
         cols = ("ma", "ten", "ngay", "khach", "tt")
-        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=6)
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=7)
         app["tv_tours"] = tv
 
         tv.heading("ma", text="Mã Tour")
@@ -661,11 +657,11 @@ def khoi_tao_hdv(root, user_data=None):
         tv.heading("khach", text="Số khách")
         tv.heading("tt", text="Trạng thái")
 
-        tv.column("ma", width=90, minwidth=80, anchor="center", stretch=False)
-        tv.column("ten", width=360, minwidth=260, anchor="w", stretch=False)
-        tv.column("ngay", width=150, minwidth=120, anchor="center", stretch=False)
-        tv.column("khach", width=110, minwidth=90, anchor="center", stretch=False)
-        tv.column("tt", width=150, minwidth=130, anchor="center", stretch=False)
+        tv.column("ma", width=90, minwidth=78, anchor="center", stretch=True)
+        tv.column("ten", width=360, minwidth=220, anchor="w", stretch=True)
+        tv.column("ngay", width=150, minwidth=110, anchor="center", stretch=True)
+        tv.column("khach", width=110, minwidth=85, anchor="center", stretch=True)
+        tv.column("tt", width=150, minwidth=110, anchor="center", stretch=True)
 
         for t in my_tours:
             occupied = app["ql"].get_occupied_seats(t["ma"])
@@ -673,16 +669,14 @@ def khoi_tao_hdv(root, user_data=None):
 
         apply_zebra(tv)
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
-        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+        tv.configure(yscrollcommand=sy.set)
         sy.pack(side="right", fill="y")
-        sx.pack(side="bottom", fill="x")
         tv.pack(side="left", fill="both", expand=True)
 
         def fit_tour_columns(event=None):
-            width = max(760, wrapper.winfo_width() - 24)
+            width = max(520, wrapper.winfo_width() - 20)
             ratios = {"ma": 0.11, "ten": 0.42, "ngay": 0.18, "khach": 0.13, "tt": 0.16}
-            mins = {"ma": 80, "ten": 260, "ngay": 120, "khach": 90, "tt": 130}
+            mins = {"ma": 78, "ten": 220, "ngay": 110, "khach": 85, "tt": 110}
             for col in cols:
                 tv.column(col, width=max(mins[col], int(width * ratios[col])))
 
@@ -814,11 +808,8 @@ def khoi_tao_hdv(root, user_data=None):
 
         tk.Label(content_area, text="CÀI ĐẶT TÀI KHOẢN CÁ NHÂN", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 20))
 
-        outer, scroll_content = create_scrollable_frame(content_area, THEME["bg"])
-        outer.pack(fill="both", expand=True)
-
-        card = tk.Frame(scroll_content, bg=THEME["surface"], bd=1, relief="solid", padx=30, pady=30)
-        card.pack(pady=10, fill="x")
+        card = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid", padx=30, pady=30)
+        card.pack(fill="x", pady=8)
 
         ma_hdv = user_data.get("maHDV", "")
         hdv_data = app["ql"].find_hdv(ma_hdv)
@@ -891,13 +882,13 @@ def khoi_tao_hdv(root, user_data=None):
         app["page_title_var"].set(title)
         app["page_subtitle_var"].set(subtitle)
         view_fn()
-        set_status(f"Đang ở {title}", THEME["primary"])
+        set_status(f"Đang ở mục: {title}", THEME["primary"])
 
     nav_items = [
-        ("Lịch Trình Tour", "Theo dõi các tour được phân công và danh sách khách", tab_danh_sach_tour, "▣"),
-        ("Hiệu Suất & Đánh Giá", "Tổng hợp hiệu suất và phản hồi từ khách hàng", tab_thong_ke, "◈"),
-        ("Gửi Thông Báo", "Gửi thông báo khẩn cấp đến từng đoàn tour", tab_thong_bao, "✦"),
-        ("Cài Đặt Tài Khoản", "Quản lý thông tin cá nhân của hướng dẫn viên", tab_cai_dat, "⚙"),
+        ("Lịch Trình Tour", "Theo dõi các tour được phân công và danh sách khách", tab_danh_sach_tour, ""),
+        ("Hiệu Suất & Đánh Giá", "Tổng hợp hiệu suất và phản hồi từ khách hàng", tab_thong_ke, ""),
+        ("Gửi Thông Báo", "Gửi thông báo khẩn cấp đến từng đoàn tour", tab_thong_bao, ""),
+        ("Cài Đặt Tài Khoản", "Quản lý thông tin cá nhân của hướng dẫn viên", tab_cai_dat, ""),
     ]
 
     nav_buttons = []
@@ -916,18 +907,18 @@ def khoi_tao_hdv(root, user_data=None):
     tk.Frame(util, bg="#2e3b56", height=1).pack(fill="x", pady=(0, 10))
     tk.Button(
         util,
-        text="  ⏻  Đăng xuất hệ thống",
-        bg="#7f1d1d",
+        text="  Đăng xuất",
+        bg="#991b1b",
         fg="white",
-        activebackground="#991b1b",
+        activebackground="#b91c1c",
         activeforeground="white",
         relief="flat",
         bd=0,
         cursor="hand2",
         anchor="w",
-        font=("Times New Roman", 12, "bold"),
-        padx=12,
-        pady=10,
+        font=("Times New Roman", 13, "bold"),
+        padx=14,
+        pady=12,
         command=lambda: logout_system(root),
     ).pack(fill="x")
 
