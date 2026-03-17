@@ -2,9 +2,105 @@
   "hdv": [
     {
       "maHDV": "HDV01",
-      "tenHDV": "Nguyễn Văn Anh",
-      "sdt": "0901234567",
-      "email": "anh@travel.com",
+      "tenHDV": "Nguyễn Thị Phương Nhung",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "sdt": "0901234501",
+      "email": "hdv01@travel.com",
+      "kn": "5",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Đã phân công",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV02",
+      "tenHDV": "Trần Minh Khoa",
+      "sdt": "0901234502",
+      "email": "hdv02@travel.com",
+      "kn": "4",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV03",
+      "tenHDV": "Lê Hoàng Nam",
+      "sdt": "0901234503",
+      "email": "hdv03@travel.com",
+      "kn": "6",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV04",
+      "tenHDV": "Phạm Thu Hà",
+      "sdt": "0901234504",
+      "email": "hdv04@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV05",
+      "tenHDV": "Trần Gia Bảo",
+      "sdt": "0901234505",
+      "email": "hdv05@travel.com",
+      "kn": "7",
+      "gioiTinh": "Nam",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV06",
+      "tenHDV": "Bùi Ngọc Lan",
+      "sdt": "0901234506",
+      "email": "hdv06@travel.com",
+      "kn": "2",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Nam",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV07",
+      "tenHDV": "Võ Thành Công",
+      "sdt": "0901234507",
+      "email": "hdv07@travel.com",
       "kn": "5",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Bắc",
@@ -17,15 +113,15 @@
       "problem_solving_score": 0
     },
     {
-      "maHDV": "HDV02",
-      "tenHDV": "Trần Minh Khoa",
-      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "sdt": "0912345678",
-      "email": "khoa@travel.com",
-      "kn": "3",
+      "maHDV": "HDV08",
+      "tenHDV": "Ngô Thị Hạnh",
+      "sdt": "0901234508",
+      "email": "hdv08@travel.com",
+      "kn": "4",
       "gioiTinh": "Nữ",
-      "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng",
+      "khuVuc": "Miền Trung",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
       "total_reviews": 0,
       "avg_rating": 0,
       "skill_score": 0,
@@ -33,44 +129,132 @@
       "problem_solving_score": 0
     },
     {
-      "maHDV": "HDV03",
-      "tenHDV": "Nguyễn Thị Phương Nhung",
-      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "sdt": "0909123123",
-      "email": "pn0212@gmail.com",
-      "kn": "3",
-      "gioiTinh": "Nữ",
-      "khuVuc": "Miền Nam",
-      "trangThai": "Sẵn sàng",
-      "total_reviews": 0,
-      "avg_rating": 0,
-      "skill_score": 0,
-      "attitude_score": 0,
-      "problem_solving_score": 0
-    },
-    {
-      "maHDV": "HDV04",
-      "tenHDV": "Bành Thị Nở",
-      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "sdt": "0909123124",
-      "email": "notravel@gmail.com",
-      "kn": "2",
+      "maHDV": "HDV09",
+      "tenHDV": "Trương Quốc Huy",
+      "sdt": "0901234509",
+      "email": "hdv09@travel.com",
+      "kn": "6",
       "gioiTinh": "Nam",
       "khuVuc": "Miền Nam",
       "trangThai": "Đã phân công",
-      "total_reviews": 1,
-      "avg_rating": 100.0,
-      "skill_score": 100.0,
-      "attitude_score": 100.0,
-      "problem_solving_score": 100.0
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
+    },
+    {
+      "maHDV": "HDV10",
+      "tenHDV": "Mai Thị Ngọc",
+      "sdt": "0901234510",
+      "email": "hdv10@travel.com",
+      "kn": "3",
+      "gioiTinh": "Nữ",
+      "khuVuc": "Miền Bắc",
+      "trangThai": "Đã phân công",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "total_reviews": 0,
+      "avg_rating": 0,
+      "skill_score": 0,
+      "attitude_score": 0,
+      "problem_solving_score": 0
     }
   ],
+  "users": [
+    {
+      "username": "khach01",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Nguyễn Minh Tuấn",
+      "sdt": "0988000001"
+    },
+    {
+      "username": "khach02",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Lê Thị Mai",
+      "sdt": "0988000002"
+    },
+    {
+      "username": "khach03",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Trần Gia Bảo",
+      "sdt": "0988000003"
+    },
+    {
+      "username": "khach04",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Phạm Khánh Linh",
+      "sdt": "0988000004"
+    },
+    {
+      "username": "khach05",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Võ Gia Hân",
+      "sdt": "0988000005"
+    },
+    {
+      "username": "khach06",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Bùi Anh Khoa",
+      "sdt": "0988000006"
+    },
+    {
+      "username": "khach07",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Đỗ Ngọc Trâm",
+      "sdt": "0988000007"
+    },
+    {
+      "username": "khach08",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Ngô Thành Luân",
+      "sdt": "0988000008"
+    },
+    {
+      "username": "khach09",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Mai Thu Trang",
+      "sdt": "0988000009"
+    },
+    {
+      "username": "khach10",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Trịnh Hoài Nam",
+      "sdt": "0988000010"
+    },
+    {
+      "username": "Khach",
+      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "fullname": "Nguyễn Thị Phương Nhung",
+      "sdt": "0909123123"
+    }
+  ],
+  "admin": {
+    "username": "admin",
+    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+  },
   "tours": [
     {
-      "ma": "T02",
-      "ten": "Sapa Mây Núi",
+      "ma": "T01",
+      "ten": "Đà Lạt Phố Hoa 3N2Đ",
       "ngay": "20/03/2026",
       "ngayKetThuc": "22/03/2026",
+      "soNgay": "3N2D",
+      "khach": "20",
+      "gia": "2250000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Đà Lạt",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV01",
+      "chiPhiDuKien": 15000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Tập trung lúc 05:30 tại cổng D1."
+    },
+    {
+      "ma": "T02",
+      "ten": "Sapa Mây Núi 3N2Đ",
+      "ngay": "25/03/2026",
+      "ngayKetThuc": "27/03/2026",
       "soNgay": "3N2D",
       "khach": "15",
       "gia": "3450000",
@@ -78,99 +262,434 @@
       "diemDen": "Sapa",
       "chiPhiDuKien": 25000000,
       "chiPhiThucTe": 0,
-      "ghiChuDieuHanh": "",
+      "ghiChuDieuHanh": "Đã chốt danh sách khách.",
       "trangThai": "Mở bán",
-      "hdvPhuTrach": "HDV01"
+      "hdvPhuTrach": "HDV02"
     },
     {
-      "ma": "T00",
-      "ten": "Bí mật",
-      "ngay": "18/03/2026",
-      "ngayKetThuc": "18/03/2026",
-      "soNgay": "1N0D",
-      "khach": "50",
-      "gia": "100000000",
-      "diemDi": "LA",
-      "diemDen": "TN",
-      "chiPhiDuKien": 1000000000,
+      "ma": "T03",
+      "ten": "Phú Quốc Nghỉ Dưỡng 4N3Đ",
+      "ngay": "28/03/2026",
+      "ngayKetThuc": "31/03/2026",
+      "soNgay": "4N3D",
+      "khach": "18",
+      "gia": "4990000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Phú Quốc",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV03",
+      "chiPhiDuKien": 42000000,
       "chiPhiThucTe": 0,
-      "ghiChuDieuHanh": "",
-      "trangThai": "Chờ khởi hành",
-      "hdvPhuTrach": "HDV04"
+      "ghiChuDieuHanh": "Có bao gồm vé máy bay khứ hồi."
+    },
+    {
+      "ma": "T04",
+      "ten": "Nha Trang Biển Xanh 3N2Đ",
+      "ngay": "02/04/2026",
+      "ngayKetThuc": "04/04/2026",
+      "soNgay": "3N2D",
+      "khach": "25",
+      "gia": "2790000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Nha Trang",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV04",
+      "chiPhiDuKien": 23000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Xe giường nằm cao cấp."
+    },
+    {
+      "ma": "T05",
+      "ten": "Đà Nẵng Hội An 4N3Đ",
+      "ngay": "05/04/2026",
+      "ngayKetThuc": "08/04/2026",
+      "soNgay": "4N3D",
+      "khach": "22",
+      "gia": "3890000",
+      "diemDi": "Hà Nội",
+      "diemDen": "Đà Nẵng",
+      "chiPhiDuKien": 36000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Đã đặt khách sạn trung tâm.",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV05"
+    },
+    {
+      "ma": "T06",
+      "ten": "Huế Cố Đô 2N1Đ",
+      "ngay": "10/04/2026",
+      "ngayKetThuc": "11/04/2026",
+      "soNgay": "2N1D",
+      "khach": "12",
+      "gia": "1990000",
+      "diemDi": "Đà Nẵng",
+      "diemDen": "Huế",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV06",
+      "chiPhiDuKien": 12000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Tham quan Đại Nội và chùa Thiên Mụ."
+    },
+    {
+      "ma": "T07",
+      "ten": "Hạ Long Du Thuyền 2N1Đ",
+      "ngay": "12/04/2026",
+      "ngayKetThuc": "13/04/2026",
+      "soNgay": "2N1D",
+      "khach": "16",
+      "gia": "3150000",
+      "diemDi": "Hà Nội",
+      "diemDen": "Hạ Long",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV07",
+      "chiPhiDuKien": 21000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Ngủ đêm trên du thuyền 4 sao."
+    },
+    {
+      "ma": "T08",
+      "ten": "Mộc Châu Hoa Nở 2N1Đ",
+      "ngay": "15/04/2026",
+      "ngayKetThuc": "16/04/2026",
+      "soNgay": "2N1D",
+      "khach": "14",
+      "gia": "1890000",
+      "diemDi": "Hà Nội",
+      "diemDen": "Mộc Châu",
+      "chiPhiDuKien": 13000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Đã giữ đủ phòng homestay.",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV08"
+    },
+    {
+      "ma": "T09",
+      "ten": "Cần Thơ Miền Tây 2N1Đ",
+      "ngay": "18/04/2026",
+      "ngayKetThuc": "19/04/2026",
+      "soNgay": "2N1D",
+      "khach": "20",
+      "gia": "1750000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Cần Thơ",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV09",
+      "chiPhiDuKien": 14500000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Tham quan chợ nổi Cái Răng."
+    },
+    {
+      "ma": "T10",
+      "ten": "Quy Nhơn Biển Nhớ 3N2Đ",
+      "ngay": "22/04/2026",
+      "ngayKetThuc": "24/04/2026",
+      "soNgay": "3N2D",
+      "khach": "17",
+      "gia": "2950000",
+      "diemDi": "TP.HCM",
+      "diemDen": "Quy Nhơn",
+      "trangThai": "Mở bán",
+      "hdvPhuTrach": "HDV10",
+      "chiPhiDuKien": 22000000,
+      "chiPhiThucTe": 0,
+      "ghiChuDieuHanh": "Bao gồm vé tham quan Kỳ Co - Eo Gió."
     }
   ],
   "bookings": [
     {
-      "maBooking": "BK04",
-      "maTour": "T00",
-      "tenKhach": "Nguyễn Văn A",
-      "sdt": "0988111222",
-      "soNguoi": "10",
-      "tongTien": 1000000000,
-      "tienCoc": 0,
-      "daThanhToan": 1000000000,
-      "conNo": 0,
-      "hinhThucThanhToan": "Thẻ",
-      "nguonKhach": "Website",
-      "usernameDat": "Khach",
-      "ghiChu": "",
-      "trangThai": "Đã thanh toán",
-      "ngayDat": "17/03/2026",
-      "danhSachKhach": []
-    },
-    {
-      "maBooking": "BK05",
-      "maTour": "T00",
-      "tenKhach": "Lê Văn Bảnh",
-      "sdt": "0909987987",
-      "soNguoi": "20",
+      "maBooking": "BK01",
+      "maTour": "T01",
+      "tenKhach": "Nguyễn Minh Tuấn",
+      "sdt": "0988000001",
+      "soNguoi": "2",
       "trangThai": "Đã cọc",
       "ngayDat": "17/03/2026",
-      "tongTien": 2000000000,
-      "tienCoc": 500000000,
-      "daThanhToan": 500000000,
-      "conNo": 1500000000,
+      "tongTien": 4500000,
+      "tienCoc": 1000000,
+      "daThanhToan": 1000000,
+      "conNo": 3500000,
       "hinhThucThanhToan": "Chuyển khoản",
       "nguonKhach": "Khách lẻ",
       "ghiChu": "",
-      "usernameDat": "Khach1",
-      "danhSachKhach": []
+      "usernameDat": "khach01",
+      "danhSachKhach": [
+        {
+          "hoTen": "Nguyễn Minh Tuấn",
+          "gioiTinh": "Nam",
+          "namSinh": "1998"
+        },
+        {
+          "hoTen": "Lê Thị Mai",
+          "gioiTinh": "Nữ",
+          "namSinh": "2000"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK02",
+      "maTour": "T02",
+      "tenKhach": "Lê Thị Mai",
+      "sdt": "0988000002",
+      "soNguoi": "1",
+      "trangThai": "Đã thanh toán",
+      "ngayDat": "17/03/2026",
+      "tongTien": 3450000,
+      "tienCoc": 3450000,
+      "daThanhToan": 3450000,
+      "conNo": 0,
+      "hinhThucThanhToan": "Tiền mặt",
+      "nguonKhach": "Facebook",
+      "ghiChu": "",
+      "usernameDat": "khach02",
+      "danhSachKhach": [
+        {
+          "hoTen": "Lê Thị Mai",
+          "gioiTinh": "Nữ",
+          "namSinh": "1999"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK03",
+      "maTour": "T03",
+      "tenKhach": "Trần Gia Bảo",
+      "sdt": "0988000003",
+      "soNguoi": "3",
+      "tongTien": 14970000,
+      "tienCoc": 3000000,
+      "daThanhToan": 3000000,
+      "conNo": 11970000,
+      "hinhThucThanhToan": "Chuyển khoản",
+      "nguonKhach": "Website",
+      "usernameDat": "khach03",
+      "ghiChu": "Yêu cầu phòng gần nhau.",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "danhSachKhach": [
+        {
+          "hoTen": "Trần Quốc Bảo",
+          "gioiTinh": "Nam",
+          "namSinh": "1995"
+        },
+        {
+          "hoTen": "Trần Ngọc Ánh",
+          "gioiTinh": "Nữ",
+          "namSinh": "1997"
+        },
+        {
+          "hoTen": "Trần Khả Hân",
+          "gioiTinh": "Nữ",
+          "namSinh": "2005"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK04",
+      "maTour": "T04",
+      "tenKhach": "Phạm Khánh Linh",
+      "sdt": "0988000004",
+      "soNguoi": "2",
+      "trangThai": "Mới tạo",
+      "ngayDat": "17/03/2026",
+      "tongTien": 5580000,
+      "tienCoc": 0,
+      "daThanhToan": 0,
+      "conNo": 5580000,
+      "hinhThucThanhToan": "Chưa thanh toán",
+      "nguonKhach": "Zalo",
+      "ghiChu": "",
+      "usernameDat": "khach04",
+      "danhSachKhach": [
+        {
+          "hoTen": "Phạm Khánh Linh",
+          "gioiTinh": "Nữ",
+          "namSinh": "2001"
+        },
+        {
+          "hoTen": "Nguyễn Hoàng Long",
+          "gioiTinh": "Nam",
+          "namSinh": "1998"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK05",
+      "maTour": "T05",
+      "tenKhach": "Võ Gia Hân",
+      "sdt": "0988000005",
+      "soNguoi": "4",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "tongTien": 15560000,
+      "tienCoc": 4000000,
+      "daThanhToan": 4000000,
+      "conNo": 11560000,
+      "hinhThucThanhToan": "Chuyển khoản",
+      "nguonKhach": "Khách đoàn",
+      "ghiChu": "Cần xuất hóa đơn.",
+      "usernameDat": "khach05",
+      "danhSachKhach": [
+        {
+          "hoTen": "Võ Gia Hân",
+          "gioiTinh": "Nữ",
+          "namSinh": "1996"
+        },
+        {
+          "hoTen": "Võ Minh Quân",
+          "gioiTinh": "Nam",
+          "namSinh": "1994"
+        },
+        {
+          "hoTen": "Nguyễn Gia Bảo",
+          "gioiTinh": "Nam",
+          "namSinh": "1997"
+        },
+        {
+          "hoTen": "Lê Ngọc Nhi",
+          "gioiTinh": "Nữ",
+          "namSinh": "1998"
+        }
+      ]
     },
     {
       "maBooking": "BK06",
-      "maTour": "T00",
-      "tenKhach": "Lê Văn Bảnh",
-      "sdt": "0909987987",
-      "soNguoi": "20",
-      "trangThai": "Đã cọc",
+      "maTour": "T06",
+      "tenKhach": "Bùi Anh Khoa",
+      "sdt": "0988000006",
+      "soNguoi": "1",
+      "trangThai": "Đã thanh toán",
       "ngayDat": "17/03/2026",
-      "tongTien": 2000000000,
-      "tienCoc": 1000000000,
-      "daThanhToan": 1000000000,
-      "conNo": 1000000000,
-      "hinhThucThanhToan": "Tiền mặt",
-      "nguonKhach": "Khách lẻ",
+      "tongTien": 1990000,
+      "tienCoc": 1990000,
+      "daThanhToan": 1990000,
+      "conNo": 0,
+      "hinhThucThanhToan": "Momo",
+      "nguonKhach": "Website",
       "ghiChu": "",
-      "usernameDat": "Khach1",
-      "danhSachKhach": []
-    }
-  ],
-  "users": [
-    {
-      "username": "Khach",
-      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "fullname": "Nguyễn Văn A",
-      "sdt": "0988111222"
+      "usernameDat": "khach06",
+      "danhSachKhach": [
+        {
+          "hoTen": "Bùi Anh Khoa",
+          "gioiTinh": "Nam",
+          "namSinh": "1993"
+        }
+      ]
     },
     {
-      "username": "Khach1",
-      "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "fullname": "Lê Văn Bảnh",
-      "sdt": "0909987987"
+      "maBooking": "BK07",
+      "maTour": "T07",
+      "tenKhach": "Đỗ Ngọc Trâm",
+      "sdt": "0988000007",
+      "soNguoi": "2",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "tongTien": 6300000,
+      "tienCoc": 2000000,
+      "daThanhToan": 2000000,
+      "conNo": 4300000,
+      "hinhThucThanhToan": "Chuyển khoản",
+      "nguonKhach": "Tiktok",
+      "ghiChu": "",
+      "usernameDat": "khach07",
+      "danhSachKhach": [
+        {
+          "hoTen": "Đỗ Ngọc Trâm",
+          "gioiTinh": "Nữ",
+          "namSinh": "2000"
+        },
+        {
+          "hoTen": "Phạm Văn Tài",
+          "gioiTinh": "Nam",
+          "namSinh": "1999"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK08",
+      "maTour": "T08",
+      "tenKhach": "Ngô Thành Luân",
+      "sdt": "0988000008",
+      "soNguoi": "3",
+      "trangThai": "Đã thanh toán",
+      "ngayDat": "17/03/2026",
+      "tongTien": 5670000,
+      "tienCoc": 5670000,
+      "daThanhToan": 5670000,
+      "conNo": 0,
+      "hinhThucThanhToan": "Tiền mặt",
+      "nguonKhach": "Khách quen",
+      "ghiChu": "",
+      "usernameDat": "khach08",
+      "danhSachKhach": [
+        {
+          "hoTen": "Ngô Thành Luân",
+          "gioiTinh": "Nam",
+          "namSinh": "1997"
+        },
+        {
+          "hoTen": "Ngô Mỹ Linh",
+          "gioiTinh": "Nữ",
+          "namSinh": "2001"
+        },
+        {
+          "hoTen": "Ngô Hoàng Nam",
+          "gioiTinh": "Nam",
+          "namSinh": "2003"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK09",
+      "maTour": "T09",
+      "tenKhach": "Mai Thu Trang",
+      "sdt": "0988000009",
+      "soNguoi": "2",
+      "trangThai": "Mới tạo",
+      "ngayDat": "17/03/2026",
+      "tongTien": 3500000,
+      "tienCoc": 0,
+      "daThanhToan": 0,
+      "conNo": 3500000,
+      "hinhThucThanhToan": "Chưa thanh toán",
+      "nguonKhach": "Fanpage",
+      "ghiChu": "",
+      "usernameDat": "khach09",
+      "danhSachKhach": [
+        {
+          "hoTen": "Mai Thu Trang",
+          "gioiTinh": "Nữ",
+          "namSinh": "1998"
+        },
+        {
+          "hoTen": "Lý Minh Khang",
+          "gioiTinh": "Nam",
+          "namSinh": "1996"
+        }
+      ]
+    },
+    {
+      "maBooking": "BK10",
+      "maTour": "T10",
+      "tenKhach": "Trịnh Hoài Nam",
+      "sdt": "0988000010",
+      "soNguoi": "1",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "tongTien": 2950000,
+      "tienCoc": 1000000,
+      "daThanhToan": 1000000,
+      "conNo": 1950000,
+      "hinhThucThanhToan": "Chuyển khoản",
+      "nguonKhach": "Website",
+      "ghiChu": "",
+      "usernameDat": "khach10",
+      "danhSachKhach": [
+        {
+          "hoTen": "Trịnh Hoài Nam",
+          "gioiTinh": "Nam",
+          "namSinh": "1994"
+        }
+      ]
     }
-  ],
-  "admin": {
-    "username": "admin",
-    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
-  }
+  ]
 }
