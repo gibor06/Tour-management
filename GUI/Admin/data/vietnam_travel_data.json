@@ -690,6 +690,24 @@
           "namSinh": "1994"
         }
       ]
+    },
+    {
+      "maBooking": "BK11",
+      "maTour": "T05",
+      "tenKhach": "Nguyễn Thị Phương Nhung",
+      "sdt": "0909123123",
+      "soNguoi": "1",
+      "trangThai": "Mới tạo",
+      "ngayDat": "17/03/2026",
+      "tongTien": 3890000,
+      "tienCoc": 0,
+      "daThanhToan": 0,
+      "conNo": 3890000,
+      "hinhThucThanhToan": "Tiền mặt",
+      "nguonKhach": "Khách lẻ",
+      "ghiChu": "",
+      "usernameDat": "Khach",
+      "danhSachKhach": []
     }
   ]
 }

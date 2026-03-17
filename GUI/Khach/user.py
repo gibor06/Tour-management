@@ -3,7 +3,7 @@ import os
 import re
 import tkinter as tk
 from tkinter import messagebox, ttk
-from datetime import datetime
+from datetime import datetime, timedelta
 import copy
 import base64
 import math
@@ -40,6 +40,16 @@ def booking_payment_status(total_amount, paid_amount):
     if total > 0 and paid < total:
         return "Đã cọc"
     return "Đã thanh toán"
+
+
+def build_cash_policy_notice(ngay_khoi_hanh):
+    base_msg = "Nếu 15 ngày trước khi khởi hành không đặt cọc hoặc thanh toán, booking sẽ bị hủy."
+    try:
+        depart_date = datetime.strptime(str(ngay_khoi_hanh or "").strip(), "%d/%m/%Y")
+        deadline = (depart_date - timedelta(days=15)).strftime("%d/%m/%Y")
+        return f"Cần đặt cọc/thanh toán trước {deadline}. {base_msg}"
+    except ValueError:
+        return f"Thanh toán tiền mặt: {base_msg}"
 
 
 # =========================
@@ -601,8 +611,20 @@ def khoi_tao_khach(root, user_data=None):
         )
         info_note.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(2, 10))
 
+        cash_policy_var = tk.StringVar(value="")
+        cash_policy_lbl = tk.Label(
+            action_fr,
+            textvariable=cash_policy_var,
+            font=("Times New Roman", 10, "bold"),
+            bg=THEME["surface"],
+            fg=THEME["warning"],
+            justify="left",
+            wraplength=260
+        )
+        cash_policy_lbl.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
         qr_box = tk.Frame(action_fr, bg=THEME["note_bg"], bd=1, relief="solid", padx=8, pady=8)
-        qr_box.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        qr_box.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
         tk.Label(
             qr_box,
@@ -647,7 +669,7 @@ def khoi_tao_khach(root, user_data=None):
         qr_box.grid_remove()
 
         action_btn_row = tk.Frame(action_fr, bg=THEME["surface"])
-        action_btn_row.grid(row=6, column=0, columnspan=2, sticky="ew")
+        action_btn_row.grid(row=7, column=0, columnspan=2, sticky="ew")
 
         def get_selected_tour_and_amount():
             sel = tv.selection()
@@ -667,8 +689,11 @@ def khoi_tao_khach(root, user_data=None):
                 qr_image_lbl.image = None
                 qr_status_var.set("")
                 qr_note_var.set("")
+                tour, _, _ = get_selected_tour_and_amount()
+                cash_policy_var.set(build_cash_policy_notice(tour.get("ngay", "")) if tour else build_cash_policy_notice(""))
                 return
 
+            cash_policy_var.set("")
             qr_box.grid()
             tour, pay_now, num_people = get_selected_tour_and_amount()
             if not tour:
@@ -706,6 +731,7 @@ def khoi_tao_khach(root, user_data=None):
         ent_pay_now.bind("<KeyRelease>", lambda _e: update_transfer_qr())
         spn_people.config(command=update_transfer_qr)
         spn_people.bind("<KeyRelease>", lambda _e: update_transfer_qr())
+        update_transfer_qr()
 
         def sync_detail_layout(event=None):
             width = detail_fr.winfo_width()
@@ -722,6 +748,7 @@ def khoi_tao_khach(root, user_data=None):
                 detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=5)
                 info_note.config(wraplength=max(220, width - 64))
+                cash_policy_lbl.config(wraplength=max(220, width - 64))
                 action_fr.grid_columnconfigure(0, weight=0, minsize=126)
             else:
                 detail_body.grid_configure(row=0, column=0, padx=(0, 12), pady=0, sticky="nsew")
@@ -732,6 +759,7 @@ def khoi_tao_khach(root, user_data=None):
                 detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=6)
                 info_note.config(wraplength=260)
+                cash_policy_lbl.config(wraplength=260)
                 action_fr.grid_columnconfigure(0, weight=0, minsize=132)
 
         detail_fr.bind("<Configure>", sync_detail_layout)
@@ -808,6 +836,8 @@ def khoi_tao_khach(root, user_data=None):
                 return messagebox.showwarning("Lỗi", "Số tiền thanh toán ngay không được lớn hơn tổng tiền.")
 
             payment_method = pay_method_var.get().strip() or PAYMENT_METHODS[0]
+            if payment_method == "Tiền mặt":
+                messagebox.showinfo("Lưu ý thanh toán tiền mặt", build_cash_policy_notice(t.get("ngay", "")))
 
             app["ql"].list_bookings.append({
                 "maBooking": new_id,
@@ -944,6 +974,18 @@ def khoi_tao_khach(root, user_data=None):
         )
         cmb_method.pack(anchor="w", pady=(4, 12))
 
+        tour_for_booking = app["ql"].find_tour(booking.get("maTour", ""))
+        cash_policy_var = tk.StringVar(value="")
+        tk.Label(
+            card,
+            textvariable=cash_policy_var,
+            bg=THEME["surface"],
+            fg=THEME["warning"],
+            justify="left",
+            font=("Times New Roman", 11, "bold"),
+            wraplength=460
+        ).pack(anchor="w", pady=(0, 10))
+
         tk.Label(card, text="Số tiền thanh toán thêm:", bg=THEME["surface"], fg=THEME["text"], font=("Times New Roman", 12, "bold")).pack(anchor="w")
         amount_entry = tk.Entry(card, font=("Times New Roman", 12), relief="solid", bd=1)
         amount_entry.insert(0, str(con_no))
@@ -999,8 +1041,10 @@ def khoi_tao_khach(root, user_data=None):
                 qr_image_lbl.image = None
                 qr_status_var.set("")
                 qr_note_var.set("")
+                cash_policy_var.set(build_cash_policy_notice(tour_for_booking.get("ngay", "")) if tour_for_booking else build_cash_policy_notice(""))
                 return
 
+            cash_policy_var.set("")
             qr_box.pack(fill="x", pady=(0, 10), before=btns)
             pay_more = max(0, safe_int(amount_entry.get()))
             if pay_more <= 0:
