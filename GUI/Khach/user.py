@@ -1,4 +1,4 @@
-import json
+﻿import json
 import os
 import re
 import tkinter as tk
@@ -478,6 +478,17 @@ def khoi_tao_khach(root, user_data=None):
         # Cột phải: form đăng ký
         action_fr = tk.Frame(detail_fr, bg=THEME["surface"], bd=1, relief="solid", padx=12, pady=12)
         action_fr.grid(row=0, column=1, sticky="nsew")
+        action_fr.grid_columnconfigure(0, weight=0, minsize=132)
+        action_fr.grid_columnconfigure(1, weight=1)
+
+        tk.Label(
+            action_fr,
+            text="ĐĂNG KÝ TOUR",
+            font=("Times New Roman", 13, "bold"),
+            bg=THEME["surface"],
+            fg=THEME["success"],
+            anchor="w"
+        ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
         tk.Label(
             action_fr,
@@ -485,7 +496,7 @@ def khoi_tao_khach(root, user_data=None):
             font=("Times New Roman", 12, "bold"),
             bg=THEME["surface"],
             anchor="w"
-        ).pack(fill="x", pady=(0, 5))
+        ).grid(row=1, column=0, sticky="w", pady=(0, 10), padx=(0, 10))
 
         spn_people = tk.Spinbox(
             action_fr,
@@ -496,7 +507,7 @@ def khoi_tao_khach(root, user_data=None):
             bd=1,
             justify="center"
         )
-        spn_people.pack(fill="x", ipady=4, pady=(0, 12))
+        spn_people.grid(row=1, column=1, sticky="ew", ipady=4, pady=(0, 10))
 
         tk.Label(
             action_fr,
@@ -504,7 +515,7 @@ def khoi_tao_khach(root, user_data=None):
             font=("Times New Roman", 12, "bold"),
             bg=THEME["surface"],
             anchor="w"
-        ).pack(fill="x", pady=(0, 5))
+        ).grid(row=2, column=0, sticky="w", pady=(0, 10), padx=(0, 10))
 
         ent_pay_now = tk.Entry(
             action_fr,
@@ -514,7 +525,7 @@ def khoi_tao_khach(root, user_data=None):
             justify="right"
         )
         ent_pay_now.insert(0, "0")
-        ent_pay_now.pack(fill="x", ipady=4, pady=(0, 12))
+        ent_pay_now.grid(row=2, column=1, sticky="ew", ipady=4, pady=(0, 10))
 
         tk.Label(
             action_fr,
@@ -522,7 +533,7 @@ def khoi_tao_khach(root, user_data=None):
             font=("Times New Roman", 12, "bold"),
             bg=THEME["surface"],
             anchor="w"
-        ).pack(fill="x", pady=(0, 5))
+        ).grid(row=3, column=0, sticky="w", pady=(0, 10), padx=(0, 10))
 
         pay_method_var = tk.StringVar(value=PAYMENT_METHODS[0])
         cmb_pay_method = ttk.Combobox(
@@ -532,7 +543,7 @@ def khoi_tao_khach(root, user_data=None):
             state="readonly",
             font=("Times New Roman", 11)
         )
-        cmb_pay_method.pack(fill="x", pady=(0, 12))
+        cmb_pay_method.grid(row=3, column=1, sticky="ew", pady=(0, 10))
 
         info_note = tk.Label(
             action_fr,
@@ -543,7 +554,10 @@ def khoi_tao_khach(root, user_data=None):
             justify="left",
             wraplength=260
         )
-        info_note.pack(fill="x", pady=(0, 12))
+        info_note.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(2, 10))
+
+        action_btn_row = tk.Frame(action_fr, bg=THEME["surface"])
+        action_btn_row.grid(row=5, column=0, columnspan=2, sticky="ew")
 
         def sync_detail_layout(event=None):
             width = detail_fr.winfo_width()
@@ -552,14 +566,15 @@ def khoi_tao_khach(root, user_data=None):
             tv.configure(height=5 if height < 820 else 6)
 
             if compact_mode:
-                action_fr.grid_configure(row=0, column=0, padx=0, pady=(0, 10), sticky="ew")
-                detail_body.grid_configure(row=1, column=0, padx=0, pady=0, sticky="nsew")
+                detail_body.grid_configure(row=0, column=0, padx=0, pady=(0, 10), sticky="nsew")
+                action_fr.grid_configure(row=1, column=0, padx=0, pady=0, sticky="ew")
                 detail_fr.grid_columnconfigure(0, weight=1, minsize=0)
                 detail_fr.grid_columnconfigure(1, weight=0, minsize=0)
-                detail_fr.grid_rowconfigure(0, weight=0)
-                detail_fr.grid_rowconfigure(1, weight=1)
+                detail_fr.grid_rowconfigure(0, weight=1)
+                detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=5)
                 info_note.config(wraplength=max(220, width - 64))
+                action_fr.grid_columnconfigure(0, weight=0, minsize=126)
             else:
                 detail_body.grid_configure(row=0, column=0, padx=(0, 12), pady=0, sticky="nsew")
                 action_fr.grid_configure(row=0, column=1, padx=0, pady=0, sticky="nsew")
@@ -569,6 +584,7 @@ def khoi_tao_khach(root, user_data=None):
                 detail_fr.grid_rowconfigure(1, weight=0)
                 detail_text.config(height=6)
                 info_note.config(wraplength=260)
+                action_fr.grid_columnconfigure(0, weight=0, minsize=132)
 
         detail_fr.bind("<Configure>", sync_detail_layout)
         sync_detail_layout()
@@ -675,7 +691,7 @@ def khoi_tao_khach(root, user_data=None):
             )
             tab_danh_sach_tour()
 
-        style_button(action_fr, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x", pady=(2, 0))
+        style_button(action_btn_row, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x", pady=(2, 0))
 
 
     def tab_tour_da_dat():
@@ -742,7 +758,7 @@ def khoi_tao_khach(root, user_data=None):
 
         top = tk.Toplevel(root)
         top.title(f"Thanh toán booking {ma_booking}")
-        top.geometry("420x330")
+        top.geometry("520x430")
         top.configure(bg=THEME["bg"])
         top.transient(root)
         top.grab_set()

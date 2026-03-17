@@ -221,6 +221,7 @@ class TravelSystem:
 
     def show_register_screen(self):
         self.clear_screen()
+        self.root.geometry(LOGIN_WINDOW_SIZE)
 
         container = tk.Frame(self.main_frame, bg=THEME["bg"])
         container.pack(fill="both", expand=True, padx=20, pady=20)
@@ -228,29 +229,31 @@ class TravelSystem:
         card = tk.Frame(
             container,
             bg=THEME["surface"],
-            padx=40,
-            pady=30,
+            padx=28,
+            pady=26,
             highlightbackground=THEME["border"],
             highlightthickness=1,
         )
-        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88)
+        card.place(relx=0.5, rely=0.5, anchor="center")
 
         def sync_register_card(event=None):
             available_w = max(320, container.winfo_width())
-            target_w = min(560, max(320, available_w - 24))
+            target_w = min(620, max(360, available_w - 24))
             card.place_configure(width=target_w)
 
             # Khi chiều cao hẹp, đẩy card lên trên một chút để tránh cụm nút bị khuất.
             if container.winfo_height() < 560:
                 card.place_configure(rely=0.45)
+                card.configure(padx=20, pady=18)
             else:
                 card.place_configure(rely=0.5)
+                card.configure(padx=28, pady=26)
 
         container.bind("<Configure>", sync_register_card)
         sync_register_card()
 
         form_inner = tk.Frame(card, bg=THEME["surface"])
-        form_inner.pack(fill="x", expand=True)
+        form_inner.pack(fill="both", expand=True)
 
         tk.Label(
             form_inner,
@@ -258,7 +261,15 @@ class TravelSystem:
             font=("Times New Roman", 20, "bold"),
             bg=THEME["surface"],
             fg=THEME["success"],
-        ).pack(pady=(0, 20))
+        ).pack(anchor="w", pady=(0, 6))
+
+        tk.Label(
+            form_inner,
+            text="Tạo tài khoản khách hàng mới",
+            font=("Times New Roman", 11, "italic"),
+            bg=THEME["surface"],
+            fg=THEME["muted"],
+        ).pack(anchor="w", pady=(0, 18))
 
         fields = [
             ("Tên đăng nhập:", "user"),
@@ -269,17 +280,23 @@ class TravelSystem:
 
         self.reg_widgets = {}
         for label_text, key in fields:
+            row_fr = tk.Frame(form_inner, bg=THEME["surface"])
+            row_fr.pack(fill="x", pady=(0, 10))
+
             tk.Label(
-                form_inner,
+                row_fr,
                 text=label_text,
-                font=("Times New Roman", 11),
+                font=("Times New Roman", 11, "bold"),
                 bg=THEME["surface"],
                 fg=THEME["text"],
+                anchor="w",
+                justify="left",
             ).pack(anchor="w")
-            entry = tk.Entry(form_inner, font=("Times New Roman", 12), bd=1, relief="solid")
+
+            entry = tk.Entry(row_fr, font=("Times New Roman", 12), bd=1, relief="solid")
             if key == "pass":
                 entry.config(show="*")
-            entry.pack(fill="x", pady=(5, 10), ipady=5)
+            entry.pack(fill="x", pady=(5, 0), ipady=5)
             self.reg_widgets[key] = entry
 
         def perform_register():
@@ -298,8 +315,11 @@ class TravelSystem:
             notifier = messagebox.showwarning if result.level == "warning" else messagebox.showerror
             notifier("Lỗi", result.message)
 
+        action_fr = tk.Frame(form_inner, bg=THEME["surface"])
+        action_fr.pack(fill="x", pady=(12, 0))
+
         tk.Button(
-            form_inner,
+            action_fr,
             text="ĐĂNG KÝ NGAY",
             bg=THEME["success"],
             fg="white",
@@ -308,10 +328,10 @@ class TravelSystem:
             cursor="hand2",
             bd=0,
             command=perform_register,
-        ).pack(fill="x", pady=20)
+        ).pack(fill="x")
 
         tk.Button(
-            form_inner,
+            action_fr,
             text="← Quay lại",
             font=("Times New Roman", 11),
             fg=THEME["muted"],
@@ -319,7 +339,7 @@ class TravelSystem:
             bg=THEME["surface"],
             cursor="hand2",
             command=lambda: self.show_login_screen("user"),
-        ).pack()
+        ).pack(pady=(10, 0))
 
 
 if __name__ == "__main__":

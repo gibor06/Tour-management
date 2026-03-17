@@ -726,7 +726,12 @@ def refresh_users(app, keyword=""):
     rows = app["ql"].list_users
     if keyword:
         kw = keyword.lower().strip()
-        rows = [u for u in rows if kw in u["username"].lower() or kw in u["fullname"].lower()]
+        rows = [
+            u for u in rows
+            if kw in u["username"].lower()
+            or kw in u["fullname"].lower()
+            or kw in str(u.get("sdt", "")).lower()
+        ]
 
     for u in rows:
         tree.insert(
@@ -735,6 +740,7 @@ def refresh_users(app, keyword=""):
             values=(u["username"], u["fullname"], u.get("sdt", ""), mask_password(u.get("password", ""))),
         )
     apply_zebra(tree)
+    set_status(app, f"Hiển thị {len(rows)} khách hàng", THEME["primary"])
 
 
 def open_user_form(app, data=None):
@@ -812,22 +818,40 @@ def open_user_form(app, data=None):
             })
 
         app["ql"].save()
-        refresh_users(app)
+        keyword = app["search_user_var"].get().strip() if app.get("search_user_var") else ""
+        refresh_users(app, keyword)
         top.destroy()
         set_status(app, "Đã lưu khách hàng thành công", THEME["success"])
 
     style_button(card, "Lưu thông tin", THEME["success"], save).pack(pady=20)
 
 
+def edit_user(app):
+    sel = app["tv_users"].selection()
+    if not sel:
+        messagebox.showwarning("Thông báo", "Vui lòng chọn khách hàng cần sửa.")
+        return
+
+    username = app["tv_users"].item(sel[0])["values"][0]
+    user = app["ql"].find_user(username)
+    if not user:
+        messagebox.showerror("Lỗi", "Không tìm thấy thông tin khách hàng.")
+        return
+
+    open_user_form(app, user)
+
+
 def delete_user(app):
     sel = app["tv_users"].selection()
     if not sel:
+        messagebox.showwarning("Thông báo", "Vui lòng chọn khách hàng cần xóa.")
         return
     username = app["tv_users"].item(sel[0])["values"][0]
     if messagebox.askyesno("Xác nhận", f"Xóa khách hàng {username}?"):
         app["ql"].data["users"] = [u for u in app["ql"].list_users if u["username"] != username]
         app["ql"].save()
-        refresh_users(app)
+        keyword = app["search_user_var"].get().strip() if app.get("search_user_var") else ""
+        refresh_users(app, keyword)
         set_status(app, f"Đã xóa khách hàng {username}", THEME["danger"])
 
 
@@ -838,8 +862,14 @@ def admin_user_tab(app):
     toolbar = tk.Frame(app["container"], bg=THEME["bg"])
     toolbar.pack(fill="x", pady=10)
     style_button(toolbar, "Thêm khách mới", THEME["success"], lambda: open_user_form(app)).pack(side="left", padx=5)
-    style_button(toolbar, "Sửa thông tin", THEME["primary"], lambda: open_user_form(app, app["ql"].find_user(app["tv_users"].item(app["tv_users"].selection()[0])["values"][0]) if app["tv_users"].selection() else None)).pack(side="left", padx=5)
+    style_button(toolbar, "Sửa thông tin", THEME["primary"], lambda: edit_user(app)).pack(side="left", padx=5)
     style_button(toolbar, "Xóa khách", THEME["danger"], lambda: delete_user(app)).pack(side="left", padx=5)
+
+    tk.Label(toolbar, text="Tìm kiếm:", bg=THEME["bg"], font=("Times New Roman", 12, "bold")).pack(side="left", padx=(16, 4))
+    search_entry = tk.Entry(toolbar, textvariable=app["search_user_var"], font=("Times New Roman", 12), relief="solid", bd=1)
+    search_entry.pack(side="left", fill="x", expand=True, ipady=4)
+    search_entry.bind("<Return>", lambda e: refresh_users(app, app["search_user_var"].get()))
+    style_button(toolbar, "Lọc", THEME["primary"], lambda: refresh_users(app, app["search_user_var"].get())).pack(side="left", padx=(8, 0))
 
     wrapper = tk.Frame(app["container"], bg=THEME["surface"], bd=1, relief="solid")
     wrapper.pack(fill="both", expand=True)
@@ -857,7 +887,7 @@ def admin_user_tab(app):
     sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
     tv.configure(yscrollcommand=sy.set)
     sy.pack(side="right", fill="y")
-    refresh_users(app)
+    refresh_users(app, app["search_user_var"].get())
 
 
 # =========================
@@ -1582,6 +1612,7 @@ def main(root=None):
         "status_var": tk.StringVar(value="Hệ thống đã sẵn sàng"),
         "status_label": None,
         "search_hdv_var": tk.StringVar(),
+        "search_user_var": tk.StringVar(),
         "search_tour_var": tk.StringVar(),
         "search_booking_var": tk.StringVar(),
     }

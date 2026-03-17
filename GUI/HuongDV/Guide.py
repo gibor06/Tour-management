@@ -451,10 +451,9 @@ def khoi_tao_hdv(root, user_data=None):
         tv.pack(side="left", fill="both", expand=True)
 
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
-        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+
+        tv.configure(yscrollcommand=sy.set)
         sy.pack(side="right", fill="y")
-        sx.pack(side="bottom", fill="x")
 
     def tab_danh_sach_tour():
         clear_container()
@@ -490,10 +489,8 @@ def khoi_tao_hdv(root, user_data=None):
         tv.pack(side="left", fill="both", expand=True)
 
         sy = ttk.Scrollbar(wrapper, orient="vertical", command=tv.yview)
-        sx = ttk.Scrollbar(wrapper, orient="horizontal", command=tv.xview)
-        tv.configure(yscrollcommand=sy.set, xscrollcommand=sx.set)
+        tv.configure(yscrollcommand=sy.set)
         sy.pack(side="right", fill="y")
-        sx.pack(side="bottom", fill="x")
 
         tv.bind("<<TreeviewSelect>>", hien_thi_chi_tiet)
 

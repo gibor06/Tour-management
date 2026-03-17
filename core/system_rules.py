@@ -85,6 +85,17 @@ def _normalize_tour(tour: dict, occupied: int, today: date) -> None:
     if status == "Hoàn thành":
         status = "Hoàn tất"
 
+    valid_statuses = {
+        "Giữ chỗ",
+        "Mở bán",
+        "Đã chốt đoàn",
+        "Chờ khởi hành",
+        "Đang đi",
+        "Hoàn tất",
+        "Đã hủy",
+        "Tạm hoãn",
+    }
+
     suc_chua = max(1, _safe_int(tour.get("khach", 1), 1))
     gia = _non_negative_int(tour.get("gia", 0))
     chi_phi_du_kien = _non_negative_int(tour.get("chiPhiDuKien", 0))
@@ -101,9 +112,7 @@ def _normalize_tour(tour: dict, occupied: int, today: date) -> None:
         tour["soNgay"] = f"{so_ngay}N{so_dem}D"
         tour["ngayKetThuc"] = ngay_ve.strftime("%d/%m/%Y")
 
-    if status in {"Đã hủy", "Tạm hoãn"}:
-        auto_status = status
-    elif ngay_ve and today > ngay_ve:
+    if ngay_ve and today > ngay_ve:
         auto_status = "Hoàn tất"
     elif ngay_di and today >= ngay_di:
         auto_status = "Đang đi"
@@ -114,13 +123,24 @@ def _normalize_tour(tour: dict, occupied: int, today: date) -> None:
     else:
         auto_status = "Mở bán"
 
+    if status not in valid_statuses:
+        status = auto_status
+    elif status not in {"Đã hủy", "Tạm hoãn", "Hoàn tất"}:
+        # Giữ trạng thái do người dùng chọn; chỉ ép trong các ràng buộc bắt buộc.
+        if occupied >= suc_chua and status in {"Mở bán", "Giữ chỗ"}:
+            status = "Đã chốt đoàn"
+        elif ngay_ve and today > ngay_ve and status in {"Đang đi", "Chờ khởi hành", "Đã chốt đoàn"}:
+            status = "Hoàn tất"
+        elif status == "Đang đi" and ngay_di and today < ngay_di:
+            status = "Chờ khởi hành"
+
     ghi_chu = str(tour.get("ghiChuDieuHanh", "") or "").strip()
     if occupied > suc_chua:
         overbook_note = f"[AUTO] Quá tải {occupied - suc_chua} chỗ."
         if overbook_note not in ghi_chu:
             ghi_chu = f"{overbook_note} {ghi_chu}".strip()
 
-    tour["trangThai"] = auto_status
+    tour["trangThai"] = status
     tour["khach"] = str(suc_chua)
     tour["gia"] = str(gia)
     tour["chiPhiDuKien"] = chi_phi_du_kien
