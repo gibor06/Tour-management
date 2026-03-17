@@ -1,4 +1,4 @@
-﻿import json
+import json
 import os
 import re
 import tkinter as tk
@@ -382,7 +382,8 @@ def khoi_tao_khach(root, user_data=None):
         wrapper.pack(fill="x")
 
         cols = ("ma", "ten", "ngay", "gia", "khach", "tt")
-        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=6)
+        tv_height = 5 if root.winfo_height() < 820 else 6
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=tv_height)
         app["tv_tours"] = tv
 
         tv.heading("ma", text="Mã")
@@ -548,6 +549,7 @@ def khoi_tao_khach(root, user_data=None):
             width = detail_fr.winfo_width()
             height = root.winfo_height()
             compact_mode = width < 1120 or height < 820
+            tv.configure(height=5 if height < 820 else 6)
 
             if compact_mode:
                 action_fr.grid_configure(row=0, column=0, padx=0, pady=(0, 10), sticky="ew")
