@@ -63,11 +63,66 @@
       "chiPhiDuKien": 25000000,
       "chiPhiThucTe": 0,
       "ghiChuDieuHanh": "",
-      "trangThai": "Mở bán",
+      "trangThai": "Đã chốt đoàn",
       "hdvPhuTrach": "HDV01"
     }
   ],
-  "bookings": [],
+  "bookings": [
+    {
+      "maBooking": "BK01",
+      "maTour": "T02",
+      "tenKhach": "Nguyễn Văn A",
+      "sdt": "0988111222",
+      "soNguoi": "4",
+      "tongTien": 13800000,
+      "tienCoc": 1000000,
+      "daThanhToan": 13800000,
+      "conNo": 0,
+      "hinhThucThanhToan": "Thẻ",
+      "nguonKhach": "Khách lẻ",
+      "usernameDat": "Khach",
+      "ghiChu": "",
+      "trangThai": "Chờ hoàn tiền",
+      "ngayDat": "17/03/2026",
+      "danhSachKhach": []
+    },
+    {
+      "maBooking": "BK02",
+      "maTour": "T02",
+      "tenKhach": "Nguyễn Văn A",
+      "sdt": "0988111222",
+      "soNguoi": "5",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "tongTien": 17250000,
+      "tienCoc": 2000000,
+      "daThanhToan": 2000000,
+      "conNo": 15250000,
+      "hinhThucThanhToan": "Momo",
+      "nguonKhach": "Khách lẻ",
+      "ghiChu": "",
+      "usernameDat": "Khach",
+      "danhSachKhach": []
+    },
+    {
+      "maBooking": "BK03",
+      "maTour": "T02",
+      "tenKhach": "Nguyễn Văn A",
+      "sdt": "0988111222",
+      "soNguoi": "10",
+      "trangThai": "Đã cọc",
+      "ngayDat": "17/03/2026",
+      "tongTien": 34500000,
+      "tienCoc": 34000000,
+      "daThanhToan": 34000000,
+      "conNo": 500000,
+      "hinhThucThanhToan": "Chuyển khoản",
+      "nguonKhach": "Khách lẻ",
+      "ghiChu": "",
+      "usernameDat": "Khach",
+      "danhSachKhach": []
+    }
+  ],
   "users": [
     {
       "username": "Khach",

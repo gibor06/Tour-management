@@ -1,4 +1,4 @@
-import json
+﻿import json
 import os
 import re
 import tkinter as tk
@@ -24,7 +24,7 @@ def is_valid_fullname(name):
 def safe_int(value):
     try:
         return int(value)
-    except:
+    except (TypeError, ValueError):
         return 0
 
 
@@ -360,13 +360,29 @@ def khoi_tao_khach(root, user_data=None):
     def tab_danh_sach_tour():
         clear_container()
 
-        tk.Label(content_area, text="KHÁM PHÁ CÁC TOUR DU LỊCH", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 15))
+        tab_canvas = tk.Canvas(content_area, bg=THEME["bg"], highlightthickness=0, bd=0)
+        tab_scroll = ttk.Scrollbar(content_area, orient="vertical", command=tab_canvas.yview)
+        tab_canvas.pack(side="left", fill="both", expand=True)
+        tab_scroll.pack(side="right", fill="y")
 
-        wrapper = tk.Frame(content_area, bg=THEME["surface"], bd=1, relief="solid")
+        tab_body = tk.Frame(tab_canvas, bg=THEME["bg"])
+        tab_window = tab_canvas.create_window((0, 0), window=tab_body, anchor="nw")
+        tab_canvas.configure(yscrollcommand=tab_scroll.set)
+
+        tab_body.bind("<Configure>", lambda e: tab_canvas.configure(scrollregion=tab_canvas.bbox("all")))
+
+        def _on_canvas_resize(event):
+            tab_canvas.itemconfigure(tab_window, width=event.width)
+
+        tab_canvas.bind("<Configure>", _on_canvas_resize)
+
+        tk.Label(tab_body, text="KHÁM PHÁ CÁC TOUR DU LỊCH", font=("Times New Roman", 20, "bold"), bg=THEME["bg"], fg=THEME["text"]).pack(anchor="w", pady=(0, 15))
+
+        wrapper = tk.Frame(tab_body, bg=THEME["surface"], bd=1, relief="solid")
         wrapper.pack(fill="x")
 
         cols = ("ma", "ten", "ngay", "gia", "khach", "tt")
-        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=8)
+        tv = ttk.Treeview(wrapper, columns=cols, show="headings", height=6)
         app["tv_tours"] = tv
 
         tv.heading("ma", text="Mã")
@@ -405,81 +421,166 @@ def khoi_tao_khach(root, user_data=None):
         sx.pack(side="bottom", fill="x")
         tv.pack(side="left", fill="both", expand=True)
 
-        detail_fr = tk.LabelFrame(content_area, text="Chi tiết tour & Đăng ký", font=("Times New Roman", 14, "bold"), bg=THEME["surface"], bd=1, relief="solid", padx=15, pady=15)
-        detail_fr.pack(fill="both", expand=True, pady=15)
+        # =========================
+        # KHUNG CHI TIẾT & ĐĂNG KÝ
+        # =========================
+        detail_fr = tk.LabelFrame(
+            tab_body,
+            text="Chi tiết tour & Đăng ký",
+            font=("Times New Roman", 14, "bold"),
+            bg=THEME["surface"],
+            bd=1,
+            relief="solid",
+            padx=12,
+            pady=12
+        )
+        detail_fr.pack(fill="x", pady=15)
 
-        lbl_detail = tk.Label(
-            detail_fr,
-            textvariable=app["detail_var"],
-            justify="left",
+        detail_fr.grid_rowconfigure(0, weight=1)
+        detail_fr.grid_columnconfigure(0, weight=1)
+        detail_fr.grid_columnconfigure(1, minsize=320)
+
+        # Cột trái: chi tiết tour
+        detail_body = tk.Frame(detail_fr, bg=THEME["surface"], bd=1, relief="solid")
+        detail_body.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+
+        detail_body.grid_rowconfigure(0, weight=1)
+        detail_body.grid_columnconfigure(0, weight=1)
+
+        detail_scroll = ttk.Scrollbar(detail_body, orient="vertical")
+        detail_text = tk.Text(
+            detail_body,
+            wrap="word",
             font=("Times New Roman", 13),
             bg=THEME["surface"],
-            anchor="w",
-            wraplength=responsive_wraplength(),
+            fg=THEME["text"],
+            relief="flat",
+            bd=0,
+            padx=10,
+            pady=8,
+            yscrollcommand=detail_scroll.set,
+            height=6
         )
-        lbl_detail.pack(side="left", fill="both", expand=True)
+        detail_scroll.config(command=detail_text.yview)
+        detail_text.grid(row=0, column=0, sticky="nsew")
+        detail_scroll.grid(row=0, column=1, sticky="ns")
 
-        action_fr = tk.Frame(detail_fr, bg=THEME["surface"])
-        action_fr.pack(side="right", padx=10)
+        def set_detail_content(content):
+            app["detail_var"].set(content)
+            detail_text.config(state="normal")
+            detail_text.delete("1.0", "end")
+            detail_text.insert("1.0", content)
+            detail_text.config(state="disabled")
 
-        def sync_detail_layout(event=None):
-            width = detail_fr.winfo_width()
-            if width < 760:
-                if str(action_fr.pack_info().get("side", "")) != "top":
-                    action_fr.pack_forget()
-                    action_fr.pack(side="top", fill="x", pady=(12, 0))
-                lbl_detail.config(wraplength=max(260, width - 40))
-                spn_people.config(width=8)
-                pay_method_cb.configure(width=14)
-                ent_pay_now.config(width=12)
-            else:
-                if str(action_fr.pack_info().get("side", "")) != "right":
-                    action_fr.pack_forget()
-                    action_fr.pack(side="right", padx=10)
-                action_w = max(220, action_fr.winfo_reqwidth())
-                lbl_detail.config(wraplength=max(320, width - action_w - 36))
-                spn_people.config(width=10)
-                pay_method_cb.configure(width=16)
-                ent_pay_now.config(width=14)
+        set_detail_content(app["detail_var"].get())
 
-        detail_fr.bind("<Configure>", sync_detail_layout)
+        # Cột phải: form đăng ký
+        action_fr = tk.Frame(detail_fr, bg=THEME["surface"], bd=1, relief="solid", padx=12, pady=12)
+        action_fr.grid(row=0, column=1, sticky="nsew")
 
-        tk.Label(action_fr, text="Số người đi:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
+        tk.Label(
+            action_fr,
+            text="Số người đi:",
+            font=("Times New Roman", 12, "bold"),
+            bg=THEME["surface"],
+            anchor="w"
+        ).pack(fill="x", pady=(0, 5))
 
-        spn_people = tk.Spinbox(action_fr, from_=1, to=50, width=10, font=("Times New Roman", 12), relief="solid", bd=1, justify="center")
-        spn_people.pack(pady=(0, 15))
+        spn_people = tk.Spinbox(
+            action_fr,
+            from_=1,
+            to=50,
+            font=("Times New Roman", 12),
+            relief="solid",
+            bd=1,
+            justify="center"
+        )
+        spn_people.pack(fill="x", ipady=4, pady=(0, 12))
 
-        tk.Label(action_fr, text="Hình thức TT:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
+        tk.Label(
+            action_fr,
+            text="Thanh toán ngay (đ):",
+            font=("Times New Roman", 12, "bold"),
+            bg=THEME["surface"],
+            anchor="w"
+        ).pack(fill="x", pady=(0, 5))
+
+        ent_pay_now = tk.Entry(
+            action_fr,
+            font=("Times New Roman", 12),
+            relief="solid",
+            bd=1,
+            justify="right"
+        )
+        ent_pay_now.insert(0, "0")
+        ent_pay_now.pack(fill="x", ipady=4, pady=(0, 12))
+
+        tk.Label(
+            action_fr,
+            text="Hình thức thanh toán:",
+            font=("Times New Roman", 12, "bold"),
+            bg=THEME["surface"],
+            anchor="w"
+        ).pack(fill="x", pady=(0, 5))
+
         pay_method_var = tk.StringVar(value=PAYMENT_METHODS[0])
-        pay_method_cb = ttk.Combobox(
+        cmb_pay_method = ttk.Combobox(
             action_fr,
             textvariable=pay_method_var,
             values=PAYMENT_METHODS,
             state="readonly",
-            width=16,
-            font=("Times New Roman", 11),
+            font=("Times New Roman", 11)
         )
-        pay_method_cb.pack(pady=(0, 12))
+        cmb_pay_method.pack(fill="x", pady=(0, 12))
 
-        tk.Label(action_fr, text="Thanh toán ngay:", font=("Times New Roman", 12, "bold"), bg=THEME["surface"]).pack(pady=(0, 5))
-        ent_pay_now = tk.Entry(action_fr, width=14, font=("Times New Roman", 12), relief="solid", bd=1, justify="center")
-        ent_pay_now.insert(0, "0")
-        ent_pay_now.pack(pady=(0, 6))
-
-        tk.Label(
+        info_note = tk.Label(
             action_fr,
-            text="Nhập 0 nếu chỉ giữ chỗ.",
+            text="Chọn tour ở bảng phía trên, nhập số tiền thanh toán trước rồi bấm đăng ký.",
             font=("Times New Roman", 10, "italic"),
             bg=THEME["surface"],
             fg=THEME["muted"],
-        ).pack(pady=(0, 14))
+            justify="left",
+            wraplength=260
+        )
+        info_note.pack(fill="x", pady=(0, 12))
+
+        def sync_detail_layout(event=None):
+            width = detail_fr.winfo_width()
+            height = root.winfo_height()
+            compact_mode = width < 1120 or height < 820
+
+            if compact_mode:
+                action_fr.grid_configure(row=0, column=0, padx=0, pady=(0, 10), sticky="ew")
+                detail_body.grid_configure(row=1, column=0, padx=0, pady=0, sticky="nsew")
+                detail_fr.grid_columnconfigure(0, weight=1, minsize=0)
+                detail_fr.grid_columnconfigure(1, weight=0, minsize=0)
+                detail_fr.grid_rowconfigure(0, weight=0)
+                detail_fr.grid_rowconfigure(1, weight=1)
+                detail_text.config(height=5)
+                info_note.config(wraplength=max(220, width - 64))
+            else:
+                detail_body.grid_configure(row=0, column=0, padx=(0, 12), pady=0, sticky="nsew")
+                action_fr.grid_configure(row=0, column=1, padx=0, pady=0, sticky="nsew")
+                detail_fr.grid_columnconfigure(0, weight=1, minsize=0)
+                detail_fr.grid_columnconfigure(1, weight=0, minsize=320)
+                detail_fr.grid_rowconfigure(0, weight=1)
+                detail_fr.grid_rowconfigure(1, weight=0)
+                detail_text.config(height=6)
+                info_note.config(wraplength=260)
+
+        detail_fr.bind("<Configure>", sync_detail_layout)
+        sync_detail_layout()
 
         def on_select(event):
             sel = tv.selection()
             if not sel:
                 return
+
             ma = tv.item(sel[0])["values"][0]
             t = app["ql"].find_tour(ma)
+            if not t:
+                return
+
             hdv = app["ql"].find_hdv(t.get("hdvPhuTrach"))
             occupied = app["ql"].get_occupied_seats(ma)
             available = max(safe_int(t["khach"]) - occupied, 0)
@@ -494,7 +595,7 @@ def khoi_tao_khach(root, user_data=None):
                 f"Trạng thái: {t['trangThai']} | Còn trống: {available} chỗ",
                 f"Ghi chú điều hành: {t.get('ghiChuDieuHanh', '') or 'Không có'}"
             ]
-            app["detail_var"].set("\n".join(info))
+            set_detail_content("\n".join(info))
 
         tv.bind("<<TreeviewSelect>>", on_select)
 
@@ -517,7 +618,6 @@ def khoi_tao_khach(root, user_data=None):
 
             occupied = app["ql"].get_occupied_seats(ma)
             available = max(safe_int(t["khach"]) - occupied, 0)
-
             if num_people > available:
                 return messagebox.showerror("Hết chỗ", f"Rất tiếc, tour này chỉ còn {available} chỗ trống!")
 
@@ -527,10 +627,9 @@ def khoi_tao_khach(root, user_data=None):
                 if ma_bk.startswith("BK"):
                     try:
                         existing_ids.append(int(ma_bk[2:]))
-                    except:
+                    except (TypeError, ValueError):
                         pass
-            next_id = max(existing_ids, default=0) + 1
-            new_id = f"BK{next_id:02d}"
+            new_id = f"BK{max(existing_ids, default=0) + 1:02d}"
 
             user_info = get_current_user()
             fullname = user_info.get("fullname", user_data.get("fullname", user_data.get("name", "Khách hàng"))) if user_info else user_data.get("fullname", "Khách hàng")
@@ -543,7 +642,7 @@ def khoi_tao_khach(root, user_data=None):
 
             payment_method = pay_method_var.get().strip() or PAYMENT_METHODS[0]
 
-            new_booking = {
+            app["ql"].list_bookings.append({
                 "maBooking": new_id,
                 "maTour": ma,
                 "tenKhach": fullname,
@@ -559,10 +658,8 @@ def khoi_tao_khach(root, user_data=None):
                 "nguonKhach": "Khách lẻ",
                 "ghiChu": "",
                 "usernameDat": user_data.get("username", ""),
-                "danhSachKhach": []
-            }
-
-            app["ql"].list_bookings.append(new_booking)
+                "danhSachKhach": [],
+            })
             app["ql"].save()
 
             messagebox.showinfo(
@@ -576,8 +673,8 @@ def khoi_tao_khach(root, user_data=None):
             )
             tab_danh_sach_tour()
 
-        style_button(action_fr, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x")
-        sync_detail_layout()
+        style_button(action_fr, "ĐĂNG KÝ NGAY", THEME["success"], dang_ky_tour).pack(fill="x", pady=(2, 0))
+
 
     def tab_tour_da_dat():
         clear_container()
