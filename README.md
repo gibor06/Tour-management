@@ -205,7 +205,7 @@ Trong tương lai, hệ thống có thể được mở rộng với các chức
 
 # 👨‍💻 Tác giả
 
-**Trần Gia Bảo** — **gibor06** và **Nguyễn Thị Phương Nhung**
+**Trần Gia Bảo** — **gibor06** và **PN0212**
 
 Sinh viên ngành **Công Nghệ Thông Tin**
 **Trường Đại học Công Thương TP.HCM (HUIT)**
